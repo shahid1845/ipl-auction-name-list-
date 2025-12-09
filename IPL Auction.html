@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TATA IPL 2026 - Auction Player List</title>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Configuration & Custom Styles -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ipl: {
+                            blue: '#1e3a8a',
+                            dark: '#0f172a',
+                            gold: '#fbbf24',
+                            orange: '#d97706'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.2);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+        /* Hide scrollbar for filter container but keep functionality */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-yellow-500 selection:text-blue-900">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-700 shadow-xl">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- Logo -->
+                <div class="flex items-center gap-3 select-none hover:scale-105 transition-transform duration-300">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-blue-900 shadow-lg">
+                        <i class="fas fa-gavel text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-white tracking-tight leading-none">TATA IPL</h1>
+                        <span class="text-xs font-bold text-yellow-500 tracking-widest uppercase">Auction 2026</span>
+                    </div>
+                </div>
+
+                <!-- Search Input -->
+                <div class="relative w-full md:w-96 group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-yellow-500 transition-colors">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <input type="text" id="searchInput" placeholder="Search player, country, or role..." 
+                        class="block w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all shadow-inner">
+                </div>
+
+                <!-- Sort Dropdown -->
+                <div class="w-full md:w-auto">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fas fa-sort-amount-down"></i>
+                        </div>
+                        <select id="sortSelect" class="block w-full pl-10 pr-8 py-2.5 bg-slate-800 border border-slate-600 text-slate-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer hover:bg-slate-750 transition-colors">
+                            <option value="default">Sort: Auction Order</option>
+                            <option value="priceHigh">Price: High to Low</option>
+                            <option value="priceLow">Price: Low to High</option>
+                            <option value="nameAsc">Name: A to Z</option>
+                            <option value="countryAsc">Nationality</option>
+                            <option value="ageAsc">Age: Youngest</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-slate-400">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Filters -->
+            <div class="flex gap-2 mt-5 overflow-x-auto pb-2 scrollbar-hide text-sm" id="filterContainer">
+                <button data-filter="all" class="filter-btn active bg-yellow-500 text-blue-900 font-bold px-4 py-1.5 rounded-full whitespace-nowrap transition-all shadow-lg shadow-yellow-500/20">All Players</button>
+                <button data-filter="capped" class="filter-btn bg-slate-800 text-slate-400 border border-slate-700 px-4 py-1.5 rounded-full whitespace-nowrap hover:bg-slate-700 hover:text-slate-200 transition-all">Capped</button>
+                <button data-filter="uncapped" class="filter-btn bg-slate-800 text-slate-400 border border-slate-700 px-4 py-1.5 rounded-full whitespace-nowrap hover:bg-slate-700 hover:text-slate-200 transition-all">Uncapped</button>
+                <div class="w-px h-6 bg-slate-700 mx-1 self-center"></div>
+                <button data-filter="price-200" class="filter-btn bg-slate-800 text-slate-400 border border-slate-700 px-4 py-1.5 rounded-full whitespace-nowrap hover:bg-slate-700 hover:text-slate-200 transition-all">₹ 2 Cr</button>
+                <button data-filter="price-75" class="filter-btn bg-slate-800 text-slate-400 border border-slate-700 px-4 py-1.5 rounded-full whitespace-nowrap hover:bg-slate-700 hover:text-slate-200 transition-all">₹ 75 L</button>
+                <button data-filter="price-30" class="filter-btn bg-slate-800 text-slate-400 border border-slate-700 px-4 py-1.5 rounded-full whitespace-nowrap hover:bg-slate-700 hover:text-slate-200 transition-all">₹ 30 L</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        
+        <!-- Stats Bar -->
+        <div class="flex justify-between items-center mb-6 px-1">
+            <h2 class="text-slate-400 text-sm font-medium">
+                Results: <span id="countDisplay" class="text-white font-bold text-lg ml-1">0</span>
+            </h2>
+            <div class="text-xs text-slate-500">Live Updates</div>
+        </div>
+
+        <!-- Player Grid -->
+        <div id="playerGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards injected via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-slate-600 animate-pulse">
+            <div class="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                <i class="fas fa-search text-3xl"></i>
+            </div>
+            <p class="text-xl font-semibold text-slate-400">No players found</p>
+            <p class="text-sm">Try adjusting your search or filters.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 mt-auto">
+        <div class="container mx-auto px-4 flex flex-col items-center gap-4">
+            <div class="text-slate-500 text-sm text-center">
+                <p class="mb-2">Unofficial Auction Dashboard created for educational purposes.</p>
+                <p>Data sourced from TATA IPL 2026 Auction List PDF.</p>
+            </div>
+            <div class="flex gap-4 text-slate-600 text-lg">
+                <a href="https://github.com/shahid1845" class="hover:text-yellow-500 transition-colors"><i class="fab fa-github"></i></a>
+                <a href="https://x.com/Shaikh1845" class="hover:text-blue-400 transition-colors"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        /**
+         * IPL Auction Data 2026
+         * Embedded directly for single-file portability.
+         */
+        const csvData = `
+"1","1","BA1","Devon","Conway","New Zealand",,"08/07/1991","34","BATTER","200"
+"2","1","BA1","Jake","Fraser-McGurk","Australia",,"11/04/2002","23","BATTER","200"
+"3","1","BA1","Cameron","Green","Australia",,"03/06/1999","26","BATTER","200"
+"4","1","BA1","Sarfaraz","Khan","India","MCA","22/10/1997","28","BATTER","75"
+"5","1","BA1","David","Miller","South Africa",,"10/06/1989","36","BATTER","200"
+"6","1","BA1","Prithvi","Shaw","India","MACA","09/11/1999","26","BATTER","75"
+"7","2","AL1","Gus","Atkinson","England",,"19/01/1998","28","ALL-ROUNDER","200"
+"8","2","AL1","Wanindu","Hasaranga","Sri Lanka",,"29/07/1997","28","ALL-ROUNDER","200"
+"9","2","AL1","Deepak","Hooda","India","RCA","19/04/1995","30","ALL-ROUNDER","75"
+"10","2","AL1","Venkatesh","Iyer","India","MPCA","25/12/1994","31","ALL-ROUNDER","200"
+"11","2","AL1","Liam","Livingstone","England",,"04/08/1993","32","ALL-ROUNDER","200"
+"12","2","AL1","Wiaan","Mulder","South Africa",,"19/02/1998","28","ALL-ROUNDER","100"
+"13","2","AL1","Rachin","Ravindra","New Zealand",,"18/11/1999","26","ALL-ROUNDER","200"
+"14","3","WK1","Finn","Allen","New Zealand",,"22/04/1999","26","WICKETKEEPER","200"
+"15","3","WK1","Jonny","Bairstow","England",,"26/09/1989","36","WICKETKEEPER","100"
+"16","3","WK1","K.S.","Bharat","India","ACA","03/10/1993","32","WICKETKEEPER","75"
+"17","3","WK1","Quinton","De Kock","South Africa",,"17/12/1992","33","WICKETKEEPER","100"
+"18","3","WK1","Ben","Duckett","England",,"17/10/1994","31","WICKETKEEPER","200"
+"19","3","WK1","Rahmanullah","Gurbaz","Afghanistan",,"28/11/2001","24","WICKETKEEPER","150"
+"20","3","WK1","Jamie","Smith","England",,"12/07/2000","25","WICKETKEEPER","200"
+"21","4","FA1","Gerald","Coetzee","South Africa",,"02/10/2000","25","BOWLER","200"
+"22","4","FA1","Akash","Deep","India","CAB","15/12/1996","29","BOWLER","100"
+"23","4","FA1","Jacob","Duffy","New Zealand",,"02/08/1994","31","BOWLER","200"
+"24","4","FA1","Fazalhag","Farooqi","Afghanistan",,"22/09/2000","25","BOWLER","100"
+"25","4","FA1","Matt","Henry","New Zealand",,"14/12/1991","34","BOWLER","200"
+"26","4","FA1","Spencer","Johnson","Australia",,"16/12/1995","30","BOWLER","150"
+"27","4","FA1","Shivam","Mavi","India","UPCA","26/11/1998","27","BOWLER","75"
+"28","4","FA1","Anrich","Nortje","South Africa",,"16/11/1993","32","BOWLER","200"
+"29","4","FA1","Matheesha","Pathirana","Sri Lanka",,"18/12/2002","23","BOWLER","200"
+"30","5","SP1","Ravi","Bishnoi","India","GUCA","05/09/2000","25","BOWLER","200"
+"31","5","SP1","Rahul","Chahar","India","RCA","04/08/1999","26","BOWLER","100"
+"32","5","SP1","Akeal","Hosein","West Indies",,"25/04/1993","32","BOWLER","200"
+"33","5","SP1","Mujeeb","Rahman","Afghanistan",,"28/03/2001","25","BOWLER","200"
+"34","5","SP1","Maheesh","Theekshana","Sri Lanka",,"01/08/2000","25","BOWLER","200"
+"35","6","UBA1","Aarya","Desai","India","GUCA","03/04/2003","23","BATTER","30"
+"36","6","UBA1","Yash","Dhull","India","DDCA","11/11/2002","23","BATTER","30"
+"37","6","UBA1","Abhinav","Manohar","India","KSCA","16/09/1994","31","BATTER","30"
+"38","6","UBA1","Anmolpreet","Singh","India","PCA","28/03/1998","28","BATTER","30"
+"39","6","UBA1","Atharva","Taide","India","VCA","26/04/2000","25","BATTER","30"
+"40","6","UBA1","Abhinav","Tejrana","India","GCA","17/12/2000","25","BATTER","30"
+"41","7","UAL1","Auqib","Dar","India","JKCA","04/11/1996","29","ALL-ROUNDER","30"
+"42","7","UAL1","Rajvardhan","Hangargekar","India","MACA","10/11/2002","23","ALL-ROUNDER","40"
+"43","7","UAL1","Tanush","Kotian","India","MCA","16/10/1998","27","ALL-ROUNDER","30"
+"44","7","UAL1","Shivang","Kumar","India","MPCA","26/05/2002","23","ALL-ROUNDER","30"
+"45","7","UAL1","Mahipal","Lomror","India","RCA","16/11/1999","26","ALL-ROUNDER","50"
+"46","7","UAL1","Kamlesh","Nagarkoti","India","RCA","28/12/1999","26","ALL-ROUNDER","30"
+"47","7","UAL1","Vijay","Shankar","India","TCA","26/01/1991","35","ALL-ROUNDER","30"
+"48","7","UAL1","Sanvir","Singh","India","PCA","12/10/1996","29","ALL-ROUNDER","30"
+"49","7","UAL1","Edhen","Tom","India","KCA","02/07/2005","20","ALL-ROUNDER","30"
+"50","7","UAL1","Prashant","Veer","India","UPCA","24/11/2005","20","ALL-ROUNDER","30"
+"51","8","UWK1","Ruchit","Ahir","India","SCA","28/10/2000","25","WICKETKEEPER","30"
+"52","8","UWK1","Vansh","Bedi","India","DDCA","23/12/2002","23","WICKETKEEPER","30"
+"53","8","UWK1","Mukul","Choudhary","India","RCA","06/08/2004","21","WICKETKEEPER","30"
+"54","8","UWK1","Tushar","Raheja","India","TNCA","07/02/2001","25","WICKETKEEPER","30"
+"55","8","UWK1","Kartik","Sharma","India","RCA","26/04/2006","19","WICKETKEEPER","30"
+"56","8","UWK1","Tejasvi","Singh","India","DDCA","18/04/2002","23","WICKETKEEPER","30"
+"57","9","UFA1","Raj","Limbani","India","BCA","02/02/2005","21","BOWLER","30"
+"58","9","UFA1","Akash","Madhwal","India","CAU","25/11/1993","32","BOWLER","30"
+"59","9","UFA1","Sushant","Mishra","India","JSCA","23/12/2000","25","BOWLER","30"
+"60","9","UFA1","Ashok","Sharma","India","RCA","17/06/2002","23","BOWLER","30"
+"61","9","UFA1","Simarjeet","Singh","India","DDCA","17/01/1998","28","BOWLER","30"
+"62","9","UFA1","Naman","Tiwari","India","UPCA","08/11/2005","20","BOWLER","30"
+"63","9","UFA1","Kartik","Tyagi","India","UPCA","08/11/2000","25","BOWLER","30"
+"64","10","USP1","Yash Raj","Punja","India","KSCA","26/01/2006","20","BOWLER","30"
+"65","10","USP1","Vignesh","Puthur","India","KCA","02/03/2001","25","BOWLER","30"
+"66","10","USP1","Karn","Sharma","India","RSPB","23/10/1987","38","BOWLER","50"
+"67","10","USP1","Shivam","Shukla","India","MPCA","11/12/1995","30","BOWLER","30"
+"68","10","USP1","Kumar Kartikeya","Singh","India","MPCA","26/12/1997","28","BOWLER","30"
+"69","10","USP1","Prashant","Solanki","India","MACA","22/02/2000","26","BOWLER","30"
+"70","10","USP1","Wahidullah","Zadran","Afghanistan",,"15/11/2007","18","BOWLER","30"
+"71","11","BA2","Mayank","Agarawal","India","KSCA","16/02/1991","35","BATTER","75"
+"72","11","BA2","Sediqullah","Atal","Afghanistan",,"12/08/2001","24","BATTER","75"
+"73","11","BA2","Ackeem","Auguste","West Indies",,"12/09/2003","22","BATTER","75"
+"74","11","BA2","Reeza","Hendricks","South Africa",,"14/08/1989","36","BATTER","100"
+"75","11","BA2","Pathum","Nissanka","Sri Lanka",,"18/05/1998","27","BATTER","75"
+"76","11","BA2","Tim","Robinson","New Zealand",,"28/04/2002","23","BATTER","75"
+"77","11","BA2","Steve","Smith","Australia",,"02/06/1989","36","BATTER","200"
+"78","11","BA2","Rahul","Tripathi","India","MACA","02/03/1991","35","BATTER","75"
+"79","12","AL2","Sean","Abbott","Australia",,"29/02/1992","34","ALL-ROUNDER","200"
+"80","12","AL2","Michael","Bracewell","New Zealand",,"14/02/1991","35","ALL-ROUNDER","200"
+"81","12","AL2","Ben","Dwarshuis","Australia",,"23/06/1994","31","ALL-ROUNDER","100"
+"82","12","AL2","Zak","Foulkes","New Zealand",,"05/06/2002","23","ALL-ROUNDER","75"
+"83","12","AL2","Jason","Holder","West Indies",,"05/11/1991","34","ALL-ROUNDER","200"
+"84","12","AL2","Daryl","Mitchell","New Zealand",,"20/05/1991","34","ALL-ROUNDER","200"
+"85","12","AL2","Daniel","Sams","Australia",,"27/10/1992","33","ALL-ROUNDER","100"
+"86","12","AL2","Dasun","Shanaka","Sri Lanka",,"09/09/1991","34","ALL-ROUNDER","75"
+"87","12","AL2","Matthew","Short","Australia",,"08/11/1995","30","ALL-ROUNDER","150"
+"88","13","WK2","Tom","Banton","England",,"11/11/1998","27","WICKETKEEPER","200"
+"89","13","WK2","Jordan","Cox","England",,"21/10/2000","25","WICKETKEEPER","75"
+"90","13","WK2","Shai","Hope","West Indies",,"10/11/1993","32","WICKETKEEPER","200"
+"91","13","WK2","Josh","Inglis","Australia",,"04/03/1995","31","WICKETKEEPER","200"
+"92","13","WK2","Benjamin","McDermott","Australia",,"12/12/1994","31","WICKETKEEPER","75"
+"93","13","WK2","Kusal","Mendis","Sri Lanka",,"02/02/1995","31","WICKETKEEPER","75"
+"94","13","WK2","Kusal","Perera","Sri Lanka",,"17/08/1990","35","WICKETKEEPER","100"
+"95","13","WK2","Tim","Seifert","New Zealand",,"14/12/1994","31","WICKETKEEPER","150"
+"96","14","FA2","Kyle","Jamieson","New Zealand",,"30/12/1994","31","BOWLER","200"
+"97","14","FA2","Saqib","Mahmood","England",,"25/02/1997","29","BOWLER","150"
+"98","14","FA2","Adam","Milne","New Zealand",,"13/04/1992","33","BOWLER","200"
+"99","14","FA2","Lungisani","Ngidi","South Africa",,"29/03/1996","30","BOWLER","200"
+"100","14","FA2","William","Orourke","New Zealand",,"06/08/2001","24","BOWLER","200"
+"101","14","FA2","Mustafizur","Rahman","Bangladesh",,"06/09/1995","30","BOWLER","200"
+"102","14","FA2","Chetan","Sakariya","India","SCA","28/02/1998","28","BOWLER","75"
+"103","14","FA2","Kuldeep","Sen","India","MPCA","22/10/1996","29","BOWLER","75"
+"104","14","FA2","Umesh","Yadav","India","VCA","25/10/1987","38","BOWLER","150"
+"105","15","SP2","Qais","Ahmad","Afghanistan",,"15/08/2000","25","BOWLER","75"
+"106","15","SP2","Rishad","Hossain","Bangladesh",,"15/07/2002","23","BOWLER","75"
+"107","15","SP2","Mohammad Waqar","Salamkheil","Afghanistan",,"02/10/2001","24","BOWLER","100"
+"108","15","SP2","Vivaskanth","Vijayakanth","Sri Lanka",,"05/12/2001","24","BOWLER","75"
+"109","16","UBA2","Ankit","Kumar","India","DDCA","02/01/2004","22","BATTER","30"
+"110","16","UBA2","Rohan","Kunnummal","India","KCA","10/05/1998","27","BATTER","30"
+"111","16","UBA2","Danish","Malewar","India","VCA","08/10/2003","22","BATTER","30"
+"112","16","UBA2","Pukhraj","Mann","India","HPCA","07/06/2001","24","BATTER","30"
+"113","16","UBA2","Salman","Nizar","India","KCA","30/06/1997","28","BATTER","30"
+"114","16","UBA2","Aman Rao","Perala","India","HYCA","02/06/2004","21","BATTER","30"
+"115","16","UBA2","Akshat","Raghuwanshi","India","MPCA","15/09/2003","22","BATTER","30"
+"116","16","UBA2","Manan","Vohra","India","UTCA","18/07/1993","32","BATTER","30"
+"117","17","UAL2","Yuvraj","Chaudhary","India","CAU","06/10/2001","24","ALL-ROUNDER","30"
+"118","17","UAL2","Satvik","Deswal","India","CAP","23/03/2007","19","ALL-ROUNDER","30"
+"119","17","UAL2","Aman","Khan","India","CAP","23/11/1996","29","ALL-ROUNDER","30"
+"120","17","UAL2","Darshan","Nalkande","India","VCA","04/10/1998","27","ALL-ROUNDER","30"
+"121","17","UAL2","Vicky","Ostwal","India","MACA","01/09/2002","23","ALL-ROUNDER","30"
+"122","17","UAL2","Sairaj","Patil","India","MCA","31/10/1996","29","ALL-ROUNDER","30"
+"123","17","UAL2","Suyash","Prabhudessai","India","GCA","06/12/1997","28","ALL-ROUNDER","30"
+"124","17","UAL2","Mayank","Rawat","India","DDCA","04/12/1999","26","ALL-ROUNDER","30"
+"125","17","UAL2","Harsh","Tyagi","India","DDCA","23/12/1999","26","ALL-ROUNDER","30"
+"126","17","UAL2","Mangesh","Yadav","India","MPCA","10/10/2002","23","ALL-ROUNDER","30"
+"127","18","UWK2","Salil","Arora","India","PCA","07/11/2002","23","WICKETKEEPER","30"
+"128","18","UWK2","Ricky","Bhui","India","ACA","29/09/1996","29","WICKETKEEPER","30"
+"129","18","UWK2","Rahul","Buddhi","India","HYCA","20/09/1997","28","WICKETKEEPER","30"
+"130","18","UWK2","Saurav","Chuahan","India","GUCA","27/05/2000","25","WICKETKEEPER","30"
+"131","18","UWK2","Yashvardhan","Dalal","India","HCA","20/07/2005","20","WICKETKEEPER","30"
+"132","18","UWK2","Abhishek","Pathak","India","MPCA","17/02/1997","29","WICKETKEEPER","30"
+"133","18","UWK2","Kunal","Rathore","India","RCA","09/10/2002","23","WICKETKEEPER","30"
+"134","18","UWK2","Ravi","Singh","India","RSPB","25/05/2001","24","WICKETKEEPER","30"
+"135","19","UFA2","KM","Asif","India","KCA","24/07/1993","32","BOWLER","40"
+"136","19","UFA2","Sakib","Hussain","India","BICA","14/12/2004","21","BOWLER","30"
+"137","19","UFA2","Mohammad","Izhar","India","BICA","01/01/2004","22","BOWLER","30"
+"138","19","UFA2","Vidwath","Kaverappa","India","KSCA","25/02/1999","27","BOWLER","30"
+"139","19","UFA2","Vijay","Kumar","India","UPCA","24/12/2005","20","BOWLER","30"
+"140","19","UFA2","Vidyadhar","Patil","India","KSCA","05/09/2000","25","BOWLER","30"
+"141","19","UFA2","PV Satyanarayana","Raju","India","ACA","10/07/1999","26","BOWLER","30"
+"142","19","UFA2","Onkar","Tarmale","India","MCA","22/08/2002","23","BOWLER","30"
+"143","19","UFA2","Prithviraj","Yarra","India","ACA","20/02/1998","28","BOWLER","30"
+"144","20","USP2","Shubham","Agrawal","India","CSCSCA","21/11/1993","32","BOWLER","40"
+"145","20","USP2","Murugan","Ashwin","India","JKCA","08/09/1990","35","BOWLER","30"
+"146","20","USP2","Tejas","Baroka","India","DDCA","01/02/1996","30","BOWLER","30"
+"147","20","USP2","K.C.","Cariappa","India","CAM","13/04/1994","31","BOWLER","30"
+"148","20","USP2","Kartik","Chadha","India","PCA","08/01/2004","22","BOWLER","30"
+"149","20","USP2","Pravin","Dubey","India","KSCA","01/07/1993","32","BOWLER","30"
+"150","20","USP2","Mohit","Rathee","India","SSCB","13/01/1999","27","BOWLER","30"
+"151","20","USP2","Himanshu","Sharma","India","CAP","06/06/1998","27","BOWLER","30"
+"152","20","USP2","Bailapudi","Yeswanth","India","ACA","19/03/2005","21","BOWLER","30"
+"153","21","AL3","Rehan","Ahmed","England",,"13/08/2004","21","ALL-ROUNDER","75"
+"154","21","AL3","Cooper","Connolly","Australia",,"22/08/2003","22","ALL-ROUNDER","200"
+"155","21","AL3","Tom","Curran","England",,"12/03/1995","31","ALL-ROUNDER","200"
+"156","21","AL3","Bevon-John","Jacobs","New Zealand",,"06/05/2002","23","ALL-ROUNDER","75"
+"157","21","AL3","Daniel","Lawrence","England",,"12/07/1997","28","ALL-ROUNDER","200"
+"158","21","AL3","George","Linde","South Africa",,"04/12/1991","34","ALL-ROUNDER","100"
+"159","21","AL3","Gulbadin","Naib","Afghanistan",,"04/06/1991","34","ALL-ROUNDER","100"
+"160","21","AL3","William","Sutherland","Australia",,"27/10/1999","26","ALL-ROUNDER","100"
+"161","21","AL3","Beau","Webster","Australia",,"01/12/1993","32","ALL-ROUNDER","125"
+"162","22","FA3","Taskin","Ahmed","Bangladesh",,"03/04/1995","31","BOWLER","75"
+"163","22","FA3","Richard","Gleeson","England",,"02/12/1987","38","BOWLER","75"
+"164","22","FA3","Alzarri","Joseph","West Indies",,"20/11/1996","29","BOWLER","200"
+"165","22","FA3","Shamar","Joseph","West Indies",,"31/08/1999","26","BOWLER","75"
+"166","22","FA3","Riley","Meredith","Australia",,"21/06/1996","29","BOWLER","150"
+"167","22","FA3","Jhye","Richardson","Australia",,"20/09/1996","29","BOWLER","150"
+"168","22","FA3","Navdeep","Saini","India","DDCA","23/11/1992","33","BOWLER","75"
+"169","22","FA3","Naveen","Ul Haq","Afghanistan",,"23/09/1999","26","BOWLER","200"
+"170","22","FA3","Luke","Wood","England",,"02/08/1995","30","BOWLER","75"
+"171","23","UBA3","Kunal","Chandela","India","CAU","07/07/1994","31","BATTER","30"
+"172","23","UBA3","Ayush","Doseja","India","DDCA","30/08/2002","23","BATTER","30"
+"173","23","UBA3","Qamran","Iqbal","India","JKCA","17/10/2001","24","BATTER","30"
+"174","23","UBA3","M.Dheeraj","Kumar","India","ACA","04/09/1999","26","BATTER","30"
+"175","23","UBA3","Bhanu","Pania","India","BCA","04/09/1996","29","BATTER","30"
+"176","23","UBA3","Sahil","Parakh","India","MACA","07/06/2007","18","BATTER","30"
+"177","23","UBA3","Arsh Kabir","Ranga","India","HCA","13/11/2004","21","BATTER","30"
+"178","23","UBA3","Adarsh","Singh","India","UPCA","03/12/2005","20","BATTER","30"
+"179","24","UAL3","Manoj","Bhandage","India","KSCA","05/10/1998","27","ALL-ROUNDER","30"
+"180","24","UAL3","Mayank","Dagar","India","HPCA","11/11/1996","29","ALL-ROUNDER","30"
+"181","24","UAL3","Raghav","Goyal","India","CAP","20/06/2001","24","ALL-ROUNDER","30"
+"182","24","UAL3","Manvanth","Kumar","India","KSCA","11/01/2004","22","ALL-ROUNDER","30"
+"183","24","UAL3","Abid","Mushtaq","India","JKCA","17/01/1997","29","ALL-ROUNDER","30"
+"184","24","UAL3","Jalal","Saxena","India","MACA","15/12/1986","39","ALL-ROUNDER","40"
+"185","24","UAL3","Atit","Sheth","India","BCA","03/02/1996","30","ALL-ROUNDER","30"
+"186","24","UAL3","Hritik","Shokeen","India","DDCA","14/08/2000","25","ALL-ROUNDER","30"
+"187","24","UAL3","Jagadeesha","Suchith","India","CAU","16/01/1994","32","ALL-ROUNDER","30"
+"188","24","UAL3","Tanay","Thyagarajann","India","HYCA","15/11/1995","30","ALL-ROUNDER","30"
+"189","25","UWK3","Joe","Clarke","England",,"26/05/1996","29","WICKETKEEPER","50"
+"190","25","UWK3","Connor","Esterhuizen","South Africa",,"31/05/2001","24","WICKETKEEPER","30"
+"191","25","UWK3","Ajitesh","Guruswamy","India","TNCA","26/09/2002","23","WICKETKEEPER","30"
+"192","25","UWK3","Siddharth","Joon","India","DDCA","11/08/2006","19","WICKETKEEPER","30"
+"193","25","UWK3","Tom","Moores","England",,"04/09/1996","29","WICKETKEEPER","40"
+"194","25","UWK3","Bipin","Saurabh","India","BICA","20/11/1999","26","WICKETKEEPER","30"
+"195","25","UWK3","Vishnu","Solanki","India","BCA","15/10/1992","33","WICKETKEEPER","30"
+"196","25","UWK3","Hardik","Tamore","India","MCA","20/10/1997","28","WICKETKEEPER","30"
+"197","26","UFA3","Sayan","Ghosh","India","CAB","16/09/1992","33","BOWLER","30"
+"198","26","UFA3","Money","Grewal","India","DDCA","04/10/2000","25","BOWLER","30"
+"199","26","UFA3","Arpit","Guleria","India","HPCA","26/04/1997","28","BOWLER","30"
+"200","26","UFA3","Sunil","Kumar","India","UPCA","15/09/1997","28","BOWLER","30"
+"201","26","UFA3","Tristan","Luus","South Africa",,"26/06/2005","20","BOWLER","30"
+"202","26","UFA3","Divesh","Sharma","India","HPCA","20/04/2001","24","BOWLER","30"
+"203","26","UFA3","Abhilash","Shetty","India","KSCA","06/06/1998","27","BOWLER","30"
+"204","26","UFA3","Irfan","Umair","India","MCA","27/07/1996","29","BOWLER","30"
+"205","26","UFA3","Kuldip","Yadav","India","DDCA","15/10/1996","29","BOWLER","30"
+"206","27","USP3","Manan","Bhardwaj","India","DDCA","15/12/2003","22","BOWLER","30"
+"207","27","USP3","Shreyas","Chavan","India","MACA","01/09/2003","22","BOWLER","30"
+"208","27","USP3","Parikshit","Dhanak","India","MCA","30/11/2002","23","BOWLER","30"
+"209","27","USP3","Chintal","Gandhi","India","BCA","25/08/1994","31","BOWLER","30"
+"210","27","USP3","Dharmendrasinh","Jadeja","India","SCA","04/08/1990","35","BOWLER","30"
+"211","27","USP3","Amit","Kumar","India","JSCA","02/11/2002","23","BOWLER","30"
+"212","27","USP3","Vishal","Nishad","India","UPCA","01/04/2005","21","BOWLER","30"
+"213","27","USP3","Saumy","Pandey","India","MPCA","04/11/2004","21","BOWLER","30"
+"214","27","USP3","Jhathavedh","Subramanyan","India","TNCA","16/09/1999","26","BOWLER","30"
+"215","28","AL4","Muhammad","Abbas","New Zealand",,"29/11/2003","22","ALL-ROUNDER","75"
+"216","28","AL4","Charith","Asalanka","Sri Lanka",,"29/06/1997","28","ALL-ROUNDER","100"
+"217","28","AL4","Roston","Chase","West Indies",,"22/03/1992","34","ALL-ROUNDER","125"
+"218","28","AL4","Liam","Dawson","England",,"01/03/1990","36","ALL-ROUNDER","200"
+"219","28","AL4","George","Garton","England",,"15/04/1997","28","ALL-ROUNDER","75"
+"220","28","AL4","Kyle","Mayers","West Indies",,"08/09/1992","33","ALL-ROUNDER","125"
+"221","28","AL4","Dwaine","Pretorius","South Africa",,"29/03/1989","37","ALL-ROUNDER","100"
+"222","28","AL4","Nathan","Smith","New Zealand",,"15/07/1998","27","ALL-ROUNDER","75"
+"223","28","AL4","Dunith","Wellalage","Sri Lanka",,"09/01/2003","23","ALL-ROUNDER","75"
+"224","29","FA4","Jason","Behrendorff","Australia",,"20/04/1990","35","BOWLER","150"
+"225","29","FA4","Tanzim","Hasan Sakib","Bangladesh",,"20/10/2002","23","BOWLER","75"
+"226","29","FA4","Matthew","Potts","England",,"29/10/1998","27","BOWLER","75"
+"227","29","FA4","Nahid","Rana","Bangladesh",,"25/10/2002","23","BOWLER","75"
+"228","29","FA4","Olly","Stone","England",,"09/10/1993","32","BOWLER","125"
+"229","29","FA4","Joshua","Tongue","England",,"15/11/1997","28","BOWLER","100"
+"230","29","FA4","Sandeep","Warrier","India","TNCA","04/04/1991","35","BOWLER","75"
+"231","30","UBA4","Sachin","Dhas","India","MACA","03/02/2005","21","BATTER","30"
+"232","30","UBA4","Miles","Hammond","India",,"11/01/1996","30","BATTER","30"
+"233","30","UBA4","Ahammed","Imran","India","KCA","22/05/2006","19","BATTER","30"
+"234","30","UBA4","Vishvarajsinh","Jadeja","India","SCA","19/07/1998","27","BATTER","30"
+"235","30","UBA4","Ayaz","Khan","India","MCA","10/09/2002","23","BATTER","30"
+"236","30","UBA4","Daniel","Lategan","England",,"25/05/2006","19","BATTER","30"
+"237","30","UBA4","Siddhant","Rana","India","SCA","18/02/2001","25","BATTER","30"
+"238","30","UBA4","Aaron","Varghese","India","HYCA","01/10/2006","19","BATTER","30"
+"239","31","UAL4","Atharva","Ankolekar","India","MCA","26/09/2000","25","ALL-ROUNDER","30"
+"240","31","UAL4","Abdul","Bazith","India","KCA","09/10/1998","27","ALL-ROUNDER","30"
+"241","31","UAL4","Karan","Lal","India","CAB","19/10/2000","25","ALL-ROUNDER","30"
+"242","31","UAL4","Shams","Mulani","India","MCA","13/03/1997","29","ALL-ROUNDER","30"
+"243","31","UAL4","Ripal","Patel","India","GUCA","28/09/1995","30","ALL-ROUNDER","30"
+"244","31","UAL4","Prince","Rai","India","PCA","05/05/1999","26","ALL-ROUNDER","30"
+"245","31","UAL4","Vivrant","Sharma","India","JKCA","30/10/1999","26","ALL-ROUNDER","30"
+"246","31","UAL4","Utkarsh","Singh","India","JSCA","07/05/1998","27","ALL-ROUNDER","30"
+"247","31","UAL4","Ayush","Vartak","India","MCA","29/10/2004","21","ALL-ROUNDER","30"
+"248","31","UAL4","Sanjay","Yadav","India","TNCA","10/05/1995","30","ALL-ROUNDER","30"
+"249","32","UFA4","Sayed Irfan","Aftab","India","CAB","20/11/2003","22","BOWLER","30"
+"250","32","UFA4","Esakkimuthu","Ayyakutti","India","TNCA","11/02/2002","24","BOWLER","30"
+"251","32","UFA4","Praful","Hinge","India","VCA","18/01/2002","24","BOWLER","30"
+"252","32","UFA4","Pankaj","Jaswal","India","DDCA","20/09/1995","30","BOWLER","30"
+"253","32","UFA4","Kulwant","Khejroliya","India","MPCA","13/03/1992","34","BOWLER","30"
+"254","32","UFA4","Ravi","Kumar","India","CAB","29/10/2003","22","BOWLER","30"
+"255","32","UFA4","Rajan","Kumar","India","CAU","08/07/1996","29","BOWLER","30"
+"256","32","UFA4","Safvan","Patel","India","BCA","03/10/1998","27","BOWLER","30"
+"257","32","UFA4","Ishan","Porel","India","CAB","05/09/1998","27","BOWLER","30"
+"258","33","USP4","Purav","Agarwal","India","MECA","30/08/2003","22","BOWLER","30"
+"259","33","USP4","Jikku","Bright","India","KCA","16/01/1997","29","BOWLER","30"
+"260","33","USP4","Yash","Dicholkar","India","MCA","15/07/1996","29","BOWLER","30"
+"261","33","USP4","Arab","Gul","Afghanistan",,"01/09/2005","20","BOWLER","40"
+"262","33","USP4","Rakibul","Hasan","Bangladesh",,"09/09/2002","23","BOWLER","30"
+"263","33","USP4","Traveen","Mathew","Sri Lanka",,"14/06/2004","21","BOWLER","30"
+"264","33","USP4","Naman","Pushpak","India","MCA","18/12/2006","19","BOWLER","30"
+"265","33","USP4","Izaz","Sawariya","India","RCA","04/07/2005","20","BOWLER","30"
+"266","33","USP4","Roshan","Wagshare","India","MACA","07/09/2003","22","BOWLER","30"
+"267","34","FAS","Wesley","Agar","Australia",,"05/02/1997","29","BOWLER","75"
+"268","34","FAS","Binura","Fernando","Sri Lanka",,"12/07/1995","30","BOWLER","75"
+"269","34","FAS","Md Shoriful","Islam","Bangladesh",,"03/06/2001","24","BOWLER","75"
+"270","34","FAS","Joshua","Little","Ireland",,"01/11/1999","26","BOWLER","75"
+"271","34","FAS","Obed","McCoy","West Indies",,"04/01/1997","29","BOWLER","75"
+"272","34","FAS","Billy","Stanlake","Australia",,"04/11/1994","31","BOWLER","75"
+"273","35","UAL5","R.S","Ambrish","India","TNCA","28/05/2007","18","ALL-ROUNDER","30"
+"274","35","UAL5","Nikhil","Chaudhary","India","PCA","04/05/1996","29","ALL-ROUNDER","40"
+"275","35","UAL5","Krains","Fuletra","India","SCA","19/06/2004","21","ALL-ROUNDER","30"
+"276","35","UAL5","Macneil","Noronha","India","KSCA","23/09/2001","24","ALL-ROUNDER","30"
+"277","35","UAL5","R","Rajkumar","India","TNCA","21/09/1993","32","ALL-ROUNDER","30"
+"278","35","UAL5","Ninad","Rathva","India","BCA","10/03/1999","27","ALL-ROUNDER","30"
+"279","35","UAL5","Sunny","Sandhu","India","TNCA","15/10/2003","22","ALL-ROUNDER","30"
+"280","35","UAL5","Shivalik","Sharma","India","BCA","28/11/1998","27","ALL-ROUNDER","30"
+"281","35","UAL5","Siddharth","Yadav","India","UPCA","13/08/2003","22","ALL-ROUNDER","30"
+"282","35","UAL5","R.Sonu","Yadav","India","TNCA","11/11/1999","26","ALL-ROUNDER","30"
+"283","36","UFAS","Waseem","Khanday","India","JKCA","20/01/2000","26","BOWLER","30"
+"284","36","UFAS","Atif","Mushtaq","India","JKCA","20/03/2003","23","BOWLER","30"
+"285","36","UFAS","Atal","Rai","India","RSPB","05/08/1999","26","BOWLER","30"
+"286","36","UFAS","C.Rakshann","Readdi","India","HYCA","29/09/2000","25","BOWLER","30"
+"287","36","UFA5","Manish","Reddy","India","HYCA","07/01/1999","27","BOWLER","30"
+"288","36","UFA5","Nishanth","Saranu","India","HYCA","03/03/2005","21","BOWLER","30"
+"289","36","UFAS","Deependra","Singh","India","RCA","15/08/2005","20","BOWLER","30"
+"290","36","UFAS","Rajat","Verma","India","HPCA","25/12/1997","28","BOWLER","30"
+"291","36","UFAS","Rohit","Yadav","India","DDCA","04/12/1999","26","BOWLER","30"
+"292","37","UAL6","Emanjot","Chahal","India","PCA","17/08/2004","21","ALL-ROUNDER","30"
+"293","37","UAL6","Shubhang","Hegde","India","KSCA","30/03/2001","25","ALL-ROUNDER","30"
+"294","37","UAL6","Bal","Krishna","India","JSCA","11/12/1998","27","ALL-ROUNDER","30"
+"295","37","UAL6","Vihaan","Malhotra","India","PCA","01/01/2007","19","ALL-ROUNDER","30"
+"296","37","UAL6","Khilan","Patel","India","GUCA","26/11/2006","19","ALL-ROUNDER","30"
+"297","37","UAL6","Delano","Potgieter","South Africa",,"05/08/1996","29","ALL-ROUNDER","30"
+"298","37","UAL6","Hardik","Raj","India","KSCA","10/03/2006","20","ALL-ROUNDER","30"
+"299","37","UAL6","Sarthak","Ranjan","India","DDCA","25/09/1996","29","ALL-ROUNDER","30"
+"300","37","UAL6","Parth","Rekhade","India","VCA","18/07/1999","26","ALL-ROUNDER","30"
+"301","37","UAL6","Tiaan","Van Vuuren","South Africa",,"31/07/2001","24","ALL-ROUNDER","30"
+"302","38","UFA6","Shreevatsha","Acharya","India","KSCA","17/03/2002","24","BOWLER","30"
+"303","38","UFA6","Sadek","Hussain","India","ACA","25/10/2001","24","BOWLER","30"
+"304","38","UFA6","Shubham","Kapse","India","VCA","22/07/1994","31","BOWLER","30"
+"305","38","UFA6","Aaqib","Khan","India","UPCA","25/12/2003","22","BOWLER","30"
+"306","38","UFA6","Sabir","Khan","India","BICA","24/11/2000","25","BOWLER","30"
+"307","38","UFA6","Bayanda","Majola","South Africa",,"08/01/2007","19","BOWLER","30"
+"308","38","UFA6","Srihari","Nair","India","KCA","19/10/2002","23","BOWLER","30"
+"309","38","UFA6","Brijesh","Sharma","India","CAB","16/12/1998","27","BOWLER","30"
+"310","38","UFA6","Aman","Shekhawat","India","RCA","05/10/2000","25","BOWLER","30"
+"311","39","UAL7","Himanshu","Bisht","India","CAU","17/11/1996","29","ALL-ROUNDER","30"
+"312","39","UAL7","Shreyan","Chakraborty","India","CAB","21/07/1996","29","ALL-ROUNDER","30"
+"313","39","UAL7","Kanishk","Chouhan","India","HCA","26/09/2006","19","ALL-ROUNDER","30"
+"314","39","UAL7","Mayank","Gusain","India","DDCA","25/09/2001","24","ALL-ROUNDER","30"
+"315","39","UAL7","Akash","Pugazhanthi","India","CAP","28/11/2003","22","ALL-ROUNDER","30"
+"316","39","UAL7","Abhimanyusingh","Rajput","India","BCA","09/05/1998","27","ALL-ROUNDER","30"
+"317","39","UAL7","Shubham","Rana","India","PCA","26/05/2006","19","ALL-ROUNDER","30"
+"318","39","UAL7","Arpit","Rana","India","DDCA","15/11/2003","22","ALL-ROUNDER","30"
+"319","39","UAL7","Maramreddy","Reddy","India","ACA","28/10/2002","23","ALL-ROUNDER","30"
+"320","39","UAL7","Sagar","Solanki","India","MPCA","01/09/2000","25","ALL-ROUNDER","30"
+"321","40","UALS","Aryaman Singh","Dhaliwal","India","HPCA","30/04/2002","23","ALL-ROUNDER","30"
+"322","40","UAL8","Daksh","Kamra","India","HCA","09/01/2003","23","ALL-ROUNDER","30"
+"323","40","UAL8","Vishal","Mandwal","India","HCA","26/01/1997","29","ALL-ROUNDER","30"
+"324","40","UAL8","Arfaz","Mohammad","India","HYCA","11/09/2001","24","ALL-ROUNDER","30"
+"325","40","UAL8","Hemang","Patel","India","GUCA","20/11/1998","27","ALL-ROUNDER","30"
+"326","40","UALB","Mridul","Surroch","India","HPCA","01/07/2003","22","ALL-ROUNDER","30"
+"327","40","UAL8","Anuj","Thakral","India","HCA","15/10/2002","23","ALL-ROUNDER","30"
+"328","40","UAL8","Parth","Vats","India","HCA","22/01/2004","22","ALL-ROUNDER","30"
+"329","40","UAL8","Lalit","Yadav","India","GCA","03/01/1997","29","ALL-ROUNDER","30"
+"330","40","UAL8","Nitin Sai","Yadav","India","HYCA","16/04/2004","21","ALL-ROUNDER","30"
+"331","41","UALS","Krish","Bhagat","India","PCA","06/11/2004","21","ALL-ROUNDER","30"
+"332","41","UALS","Prerit","Dutta","India","PCA","22/09/1998","27","ALL-ROUNDER","30"
+"333","41","UAL9","Sammar","Gajjar","India","SCA","14/08/2003","22","ALL-ROUNDER","30"
+"334","41","UAL9","Nasir","Lone","India","JKCA","05/09/1997","28","ALL-ROUNDER","30"
+"335","41","UAL9","Ishan","Mulchandani","India","MCA","28/03/2000","26","ALL-ROUNDER","30"
+"336","41","UALS","Akhil","Scaria","India","KCA","05/10/1998","27","ALL-ROUNDER","30"
+"337","41","UALS","Muhammed","Sharafuddeen","India","KCA","14/02/1995","31","ALL-ROUNDER","30"
+"338","41","UALS","K.Ajay","Singh","India","RCA","27/06/1993","32","ALL-ROUNDER","30"
+"339","41","UALS","Ritik","Tada","India","MPCA","10/10/2002","23","ALL-ROUNDER","30"
+"340","41","UALS","Luckyrajsinh","Vaghela","India","SCA","14/04/2002","23","ALL-ROUNDER","30"
+"341","42","UAL10","Mohamed","Ali","India","TNCA","03/10/2004","21","ALL-ROUNDER","30"
+"342","42","UAL10","Madhav","Bajaj","India","KSCA","06/05/2000","25","ALL-ROUNDER","30"
+"343","47","UAL10","Akshu","Bajwa","India","UPCA","18/12/2005","20","ALL-ROUNDER","30"
+"344","42","UAL10","Varun Raj Singh","Bisht","India","VCA","05/01/2004","22","ALL-ROUNDER","30"
+"345","42","UAL10","Rishabh","Chauhan","India","MPCA","05/09/1999","26","ALL-ROUNDER","30"
+"346","42","UAL10","Jack","Edwards","Australia",,"19/04/2000","25","ALL-ROUNDER","50"
+"347","42","UAL10","Dian","Forrester","South Africa",,"07/06/2000","25","ALL-ROUNDER","30"
+"348","42","UAL10","Dhurmil","Matkar","India","MCA","03/06/1996","29","ALL-ROUNDER","30"
+"349","42","UAL10","Shiva","Singh","India","UPCA","16/10/1999","26","ALL-ROUNDER","30"
+"350","42","UAL10","Parikshit","Valsangkar","India","MCA","24/2/1995","31","ALL-ROUNDER","30"
+`;
+
+        // --- Data Parsing & Processing ---
+        
+        function parseCSV(csv) {
+            const rows = csv.trim().split('\n');
+            return rows.map(row => {
+                // Regex to handle CSV quoting properly
+                const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                if (!matches) return null;
+
+                const cols = matches.map(col => col.replace(/^"|"$/g, '').trim());
+                
+                // Parse Price
+                const rawPrice = cols[10] || "0";
+                const priceVal = parseInt(rawPrice.replace(/\D/g, '')) || 0;
+                let displayPrice = "";
+                if (priceVal >= 100) {
+                    displayPrice = `₹ ${(priceVal / 100).toFixed(2).replace('.00','')} Cr`;
+                } else {
+                    displayPrice = `₹ ${priceVal} Lakh`;
+                }
+
+                // Capped/Uncapped Logic (SetID usually starts with U for Uncapped)
+                const isUncapped = cols[2].startsWith('U');
+
+                return {
+                    id: cols[0],
+                    set: cols[2],
+                    firstName: cols[3],
+                    surname: cols[4],
+                    fullName: `${cols[3]} ${cols[4]}`,
+                    country: cols[5],
+                    association: cols[6] || "-",
+                    dob: cols[7],
+                    age: parseInt(cols[8]),
+                    role: cols[9],
+                    basePrice: priceVal,
+                    displayPrice: displayPrice,
+                    isUncapped: isUncapped
+                };
+            }).filter(item => item !== null);
+        }
+
+        const players = parseCSV(csvData);
+        let filteredPlayers = [...players];
+
+        // --- UI Rendering ---
+
+        const grid = document.getElementById('playerGrid');
+        const countDisplay = document.getElementById('countDisplay');
+        const emptyState = document.getElementById('emptyState');
+
+        function renderPlayers(data) {
+            grid.innerHTML = '';
+            countDisplay.innerText = data.length;
+
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            const flagMap = {
+                "India": "🇮🇳", "Australia": "🇦🇺", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", 
+                "South Africa": "🇿🇦", "New Zealand": "🇳🇿", "West Indies": "🌴", 
+                "Afghanistan": "🇦🇫", "Sri Lanka": "🇱🇰", "Bangladesh": "🇧🇩", 
+                "Ireland": "🇮🇪", "Zimbabwe": "🇿🇼"
+            };
+
+            data.forEach(player => {
+                const flag = flagMap[player.country] || "🏏";
+                
+                let roleIcon = "fa-user";
+                let roleColor = "text-slate-400";
+                if(player.role.includes("BATTER")) { roleIcon = "fa-baseball-bat-ball"; roleColor = "text-blue-400"; }
+                else if(player.role.includes("BOWLER")) { roleIcon = "fa-bullseye"; roleColor = "text-red-400"; }
+                else if(player.role.includes("WICKET")) { roleIcon = "fa-hands-holding-circle"; roleColor = "text-yellow-400"; }
+                else if(player.role.includes("ALL")) { roleIcon = "fa-bolt"; roleColor = "text-purple-400"; }
+
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800 rounded-2xl overflow-hidden shadow-lg border border-slate-700 card-hover flex flex-col group';
+                card.innerHTML = `
+                    <div class="relative bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 p-5 border-b border-slate-700/50">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">#${player.id} • ${player.set}</span>
+                                <h3 class="text-white text-lg font-medium leading-tight mt-1">${player.firstName}</h3>
+                                <h2 class="text-white text-2xl font-black leading-none tracking-tight">${player.surname.toUpperCase()}</h2>
+                            </div>
+                            <div class="text-3xl filter drop-shadow-md grayscale group-hover:grayscale-0 transition-all duration-300" title="${player.country}">
+                                ${flag}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5 flex-grow space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-700/50 flex items-center justify-center ${roleColor}">
+                                <i class="fas ${roleIcon} text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-500 font-bold uppercase">Role</p>
+                                <p class="text-sm text-slate-200 font-medium">${player.role}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                             <div class="bg-slate-700/30 rounded-lg p-2 flex flex-col justify-center">
+                                <p class="text-[10px] text-slate-500 font-bold uppercase">Age</p>
+                                <p class="text-sm text-slate-200">${player.age}</p>
+                            </div>
+                            <div class="bg-slate-700/30 rounded-lg p-2 flex flex-col justify-center">
+                                <p class="text-[10px] text-slate-500 font-bold uppercase">Status</p>
+                                <p class="text-sm text-slate-200">${player.isUncapped ? 'Uncapped' : 'Capped'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto bg-slate-900/50 p-4 border-t border-slate-700/50">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-500 font-bold uppercase tracking-wide">Base Price</span>
+                            <span class="text-yellow-500 font-bold text-lg font-mono">${player.displayPrice}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // --- Interaction Logic ---
+        
+        const searchInput = document.getElementById('searchInput');
+        const sortSelect = document.getElementById('sortSelect');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        function filterAndSort() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const sortValue = sortSelect.value;
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+
+            // 1. Filter
+            let result = players.filter(player => {
+                const matchesSearch = 
+                    player.fullName.toLowerCase().includes(searchTerm) || 
+                    player.country.toLowerCase().includes(searchTerm) ||
+                    player.role.toLowerCase().includes(searchTerm);
+
+                let matchesFilter = true;
+                if (activeFilter === 'capped') matchesFilter = !player.isUncapped;
+                if (activeFilter === 'uncapped') matchesFilter = player.isUncapped;
+                if (activeFilter === 'price-200') matchesFilter = player.basePrice === 200;
+                if (activeFilter === 'price-75') matchesFilter = player.basePrice === 75;
+                if (activeFilter === 'price-30') matchesFilter = player.basePrice === 30;
+
+                return matchesSearch && matchesFilter;
+            });
+
+            // 2. Sort
+            result.sort((a, b) => {
+                switch(sortValue) {
+                    case 'priceHigh': return b.basePrice - a.basePrice;
+                    case 'priceLow': return a.basePrice - b.basePrice;
+                    case 'nameAsc': return a.fullName.localeCompare(b.fullName);
+                    case 'countryAsc': return a.country.localeCompare(b.country);
+                    case 'ageAsc': return a.age - b.age;
+                    default: return parseInt(a.id) - parseInt(b.id);
+                }
+            });
+
+            renderPlayers(result);
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', filterAndSort);
+        sortSelect.addEventListener('change', filterAndSort);
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('active', 'bg-yellow-500', 'text-blue-900', 'font-bold', 'shadow-lg');
+                    b.classList.add('bg-slate-800', 'text-slate-400');
+                });
+                
+                const target = e.currentTarget;
+                target.classList.remove('bg-slate-800', 'text-slate-400');
+                target.classList.add('active', 'bg-yellow-500', 'text-blue-900', 'font-bold', 'shadow-lg');
+                
+                filterAndSort();
+            });
+        });
+
+        // Initialize
+        renderPlayers(players);
+
+    </script>
+</body>
+</html>
