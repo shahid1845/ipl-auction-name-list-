@@ -3,343 +3,1035 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TATA IPL 2026 - Auction Player List Dashboard</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        ipl: {
-                            blue: '#1e3a8a',
-                            dark: '#0f172a',
-                            gold: '#fbbf24',
-                            orange: '#d97706'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Montserrat', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <title>TATA IPL 2026 - Auction List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
         body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Montserrat', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
-        /* Custom scrollbar style for the table container */
-        .table-container::-webkit-scrollbar {
-            height: 8px;
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        .table-container::-webkit-scrollbar-thumb {
-            background-color: #d97706;
-            border-radius: 4px;
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.05)" stroke-width="1" fill="none"/></svg>');
+            opacity: 0.3;
         }
-        .table-container::-webkit-scrollbar-track {
-            background-color: #1e293b;
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+        }
+        
+        .search-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px 14px 45px;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+        }
+        
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        select {
+            padding: 13px 15px;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stat-box {
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .stat-box h3 {
+            font-size: 1.8rem;
+            color: #1e3c72;
+            margin-bottom: 5px;
+        }
+        
+        .stat-box p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .players-table {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+            user-select: none;
+        }
+        
+        th.sortable {
+            cursor: pointer;
+        }
+        
+        th.sortable:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        th i {
+            margin-left: 8px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8fafd;
+        }
+        
+        td {
+            padding: 16px 15px;
+            font-size: 0.95rem;
+        }
+        
+        .player-name {
+            font-weight: 600;
+            color: #1e3c72;
+        }
+        
+        .country {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .country-india {
+            background-color: #e8f4ff;
+            color: #1e3c72;
+        }
+        
+        .country-other {
+            background-color: #f0f0f0;
+            color: #555;
+        }
+        
+        .specialism {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .batter {
+            background-color: #fff2e5;
+            color: #cc6600;
+        }
+        
+        .all-rounder {
+            background-color: #e6f7ff;
+            color: #0066cc;
+        }
+        
+        .wicketkeeper {
+            background-color: #f0e6ff;
+            color: #6600cc;
+        }
+        
+        .bowler {
+            background-color: #e6ffe6;
+            color: #009933;
+        }
+        
+        .price {
+            font-weight: 700;
+            color: #1e3c72;
+        }
+        
+        .capped {
+            color: #009933;
+            font-weight: 600;
+        }
+        
+        .uncapped {
+            color: #ff6600;
+            font-weight: 600;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .no-results i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .pagination button {
+            padding: 10px 16px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background-color: #f0f5ff;
+            border-color: #2a5298;
+        }
+        
+        .pagination button.active {
+            background-color: #2a5298;
+            color: white;
+            border-color: #2a5298;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5eb;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .search-box {
+                min-width: 100%;
+            }
+            
+            .players-table {
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
-
-    <header class="text-center mb-8">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-ipl-gold">
-            TATA IPL 2026 AUCTION LIST
-        </h1>
-        <p class="text-xl text-slate-400 mt-2">Interactive Player Database (Sets 1-15)</p>
-    </header>
-
-    <div class="max-w-7xl mx-auto">
+<body>
+    <div class="header">
+        <h1>TATA IPL 2026 Auction List</h1>
+        <p>Complete list of 350 players available for the TATA Indian Premier League 2026 auction</p>
+    </div>
+    
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by player name, country, specialism...">
+        </div>
         
-        <div class="flex flex-col md:flex-row gap-4 mb-6">
+        <div class="filter-container">
+            <select id="specialismFilter">
+                <option value="">All Specialisms</option>
+                <option value="BATTER">Batter</option>
+                <option value="ALL-ROUNDER">All-Rounder</option>
+                <option value="WICKETKEEPER">Wicketkeeper</option>
+                <option value="BOWLER">Bowler</option>
+            </select>
             
-            <div class="relative flex-grow">
-                <input type="text" id="searchInput" placeholder="Search by Player Name or Country..." class="w-full py-3 pl-12 pr-4 text-slate-200 bg-slate-800 border border-ipl-blue rounded-xl focus:ring-2 focus:ring-ipl-gold focus:outline-none transition">
-                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-ipl-gold"></i>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <label for="sortSelect" class="text-slate-400 font-semibold hidden sm:inline">Sort By:</label>
-                <select id="sortSelect" class="py-3 px-4 text-slate-200 bg-slate-800 border border-ipl-blue rounded-xl focus:ring-2 focus:ring-ipl-gold focus:outline-none appearance-none cursor-pointer">
-                    <option value="id">Serial No. (Default)</option>
-                    <option value="priceHigh">Base Price (High to Low)</option>
-                    <option value="priceLow">Base Price (Low to High)</option>
-                    <option value="nameAsc">Name (A-Z)</option>
-                    <option value="countryAsc">Country (A-Z)</option>
-                    <option value="ageAsc">Age (Low to High)</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-3 md:grid-cols-7 gap-3 mb-6">
-            <button data-filter="All" class="filter-btn active bg-ipl-gold text-ipl-blue font-bold shadow-lg py-2 px-2 rounded-lg text-sm transition transform hover:scale-105">All Players</button>
-            <button data-filter="BATTER" class="filter-btn bg-slate-800 text-slate-400 py-2 px-2 rounded-lg text-sm transition hover:bg-slate-700">Batters</button>
-            <button data-filter="BOWLER" class="filter-btn bg-slate-800 text-slate-400 py-2 px-2 rounded-lg text-sm transition hover:bg-slate-700">Bowlers</button>
-            <button data-filter="ALL-ROUNDER" class="filter-btn bg-slate-800 text-slate-400 py-2 px-2 rounded-lg text-sm transition hover:bg-slate-700">All-Rounders</button>
-            <button data-filter="WICKETKEEPER" class="filter-btn bg-slate-800 text-slate-400 py-2 px-2 rounded-lg text-sm transition hover:bg-slate-700">WKs</button>
-            <button data-filter="Capped" class="filter-btn bg-slate-800 text-slate-400 py-2 px-2 rounded-lg text-sm transition hover:bg-slate-700">Capped</button>
-            <button data-filter="Uncapped" class="filter-btn bg-slate-800 text-slate-400 py-2 px-2 rounded-lg text-sm transition hover:bg-slate-700">Uncapped</button>
-        </div>
-
-        <div class="table-container overflow-x-auto bg-slate-900 rounded-xl shadow-2xl">
-            <table id="playerTable" class="min-w-full divide-y divide-slate-700">
-                <thead class="bg-slate-800 sticky top-0">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Sr. No.</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Player Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Country</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Age</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Role</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Capped/Uncapped</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Set No.</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Base Price (Lakhs)</th>
-                    </tr>
-                </thead>
-                <tbody id="playerList" class="divide-y divide-slate-800">
-                    </tbody>
-            </table>
-            <div id="noResults" class="hidden text-center py-12 text-2xl font-semibold text-slate-400">
-                <i class="fas fa-search-minus mr-2"></i> No players match your current filters.
-            </div>
+            <select id="countryFilter">
+                <option value="">All Countries</option>
+                <option value="India">India</option>
+                <option value="Australia">Australia</option>
+                <option value="England">England</option>
+                <option value="New Zealand">New Zealand</option>
+                <option value="South Africa">South Africa</option>
+                <option value="Sri Lanka">Sri Lanka</option>
+                <option value="Afghanistan">Afghanistan</option>
+                <option value="West Indies">West Indies</option>
+                <option value="Bangladesh">Bangladesh</option>
+            </select>
+            
+            <select id="priceFilter">
+                <option value="">All Prices</option>
+                <option value="30">30 Lakh</option>
+                <option value="40">40 Lakh</option>
+                <option value="50">50 Lakh</option>
+                <option value="75">75 Lakh</option>
+                <option value="100">100 Lakh</option>
+                <option value="125">125 Lakh</option>
+                <option value="150">150 Lakh</option>
+                <option value="200">200 Lakh</option>
+            </select>
         </div>
     </div>
-
+    
+    <div class="stats">
+        <div class="stat-box">
+            <h3 id="totalPlayers">350</h3>
+            <p>Total Players</p>
+        </div>
+        <div class="stat-box">
+            <h3 id="cappedPlayers">0</h3>
+            <p>Capped Players</p>
+        </div>
+        <div class="stat-box">
+            <h3 id="uncappedPlayers">0</h3>
+            <p>Uncapped Players</p>
+        </div>
+        <div class="stat-box">
+            <h3 id="indianPlayers">0</h3>
+            <p>Indian Players</p>
+        </div>
+        <div class="stat-box">
+            <h3 id="overseasPlayers">0</h3>
+            <p>Overseas Players</p>
+        </div>
+    </div>
+    
+    <div class="players-table">
+        <table id="playersTable">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="srNo">Sr. No. <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="name">Player Name <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="country">Country <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="age">Age <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="specialism">Specialism <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="price">Base Price <i class="fas fa-sort"></i></th>
+                    <th class="sortable" data-sort="status">Status <i class="fas fa-sort"></i></th>
+                </tr>
+            </thead>
+            <tbody id="playersTableBody">
+                <!-- Player data will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+        
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fas fa-search"></i>
+            <h3>No players found</h3>
+            <p>Try adjusting your search or filters</p>
+        </div>
+    </div>
+    
+    <div class="pagination" id="pagination">
+        <!-- Pagination buttons will be inserted here by JavaScript -->
+    </div>
+    
+    <div class="footer">
+        <p>TATA IPL 2026 Auction List - Data extracted from official PDF dated 8.12.25</p>
+        <p>Note: All prices are in Indian Rupees Lakhs (1 Lakh = 100,000 INR)</p>
+    </div>
+    
     <script>
-        // --- 1. PLAYER DATA ARRAY (Extracted from your PDF) ---
-        const playerMasterList = [
-            { id: 1, set: 'BA1', fullName: 'Devon Conway', country: 'New Zealand', age: 34, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 2, set: 'BA1', fullName: 'Jake Fraser-McGurk', country: 'Australia', age: 23, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 3, set: 'BA1', fullName: 'Cameron Green', country: 'Australia', age: 26, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 4, set: 'BA1', fullName: 'Sarfaraz Khan', country: 'India', age: 28, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 5, set: 'BA1', fullName: 'David Miller', country: 'South Africa', age: 36, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 6, set: 'BA1', fullName: 'Prithvi Shaw', country: 'India', age: 26, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 7, set: 'AL1', fullName: 'Gus Atkinson', country: 'England', age: 28, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 8, set: 'AL1', fullName: 'Wanindu Hasaranga', country: 'Sri Lanka', age: 28, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 9, set: 'AL1', fullName: 'Deepak Hooda', country: 'India', age: 30, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 10, set: 'AL1', fullName: 'Venkatesh Iyer', country: 'India', age: 31, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 11, set: 'AL1', fullName: 'Liam Livingstone', country: 'England', age: 32, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 12, set: 'AL1', fullName: 'Wiaan Mulder', country: 'South Africa', age: 28, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 13, set: 'AL1', fullName: 'Rachin Ravindra', country: 'New Zealand', age: 26, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 14, set: 'WK1', fullName: 'Finn Allen', country: 'New Zealand', age: 26, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 15, set: 'WK1', fullName: 'Jonny Bairstow', country: 'England', age: 36, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 16, set: 'WK1', fullName: 'K.S. Bharat', country: 'India', age: 32, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 17, set: 'WK1', fullName: 'Quinton De Kock', country: 'South Africa', age: 33, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 18, set: 'WK1', fullName: 'Ben Duckett', country: 'England', age: 31, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 19, set: 'WK1', fullName: 'Rahmanullah Gurbaz', country: 'Afghanistan', age: 24, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 150 },
-            { id: 20, set: 'WK1', fullName: 'Jamie Smith', country: 'England', age: 25, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 21, set: 'FA1', fullName: 'Gerald Coetzee', country: 'South Africa', age: 25, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 22, set: 'FA1', fullName: 'Akash Deep', country: 'India', age: 29, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 23, set: 'FA1', fullName: 'Jacob Duffy', country: 'New Zealand', age: 31, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 24, set: 'FA1', fullName: 'Fazalhag Farooqi', country: 'Afghanistan', age: 25, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 25, set: 'FA1', fullName: 'Matt Henry', country: 'New Zealand', age: 34, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 26, set: 'FA1', fullName: 'Spencer Johnson', country: 'Australia', age: 30, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 150 },
-            { id: 27, set: 'FA1', fullName: 'Shivam Mavi', country: 'India', age: 27, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 28, set: 'FA1', fullName: 'Anrich Nortje', country: 'South Africa', age: 32, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 29, set: 'FA1', fullName: 'Matheesha Pathirana', country: 'Sri Lanka', age: 23, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 30, set: 'SP1', fullName: 'Ravi Bishnoi', country: 'India', age: 25, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 31, set: 'SP1', fullName: 'Rahul Chahar', country: 'India', age: 26, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 32, set: 'SP1', fullName: 'Akeal Hosein', country: 'West Indies', age: 32, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 33, set: 'SP1', fullName: 'Mujeeb Rahman', country: 'Afghanistan', age: 25, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 34, set: 'SP1', fullName: 'Maheesh Theekshana', country: 'Sri Lanka', age: 25, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 35, set: 'UBA1', fullName: 'Aarya Desai', country: 'India', age: 23, specialism: 'BATTER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 36, set: 'UBA1', fullName: 'Yash Dhull', country: 'India', age: 23, specialism: 'BATTER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 37, set: 'UBA1', fullName: 'Abhinav Manohar', country: 'India', age: 31, specialism: 'BATTER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 38, set: 'UBA1', fullName: 'Anmolpreet Singh', country: 'India', age: 28, specialism: 'BATTER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 39, set: 'UBA1', fullName: 'Atharva Taide', country: 'India', age: 25, specialism: 'BATTER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 40, set: 'UBA1', fullName: 'Abhinav Tejrana', country: 'India', age: 25, specialism: 'BATTER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 41, set: 'UAL1', fullName: 'Auqib Dar', country: 'India', age: 29, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 42, set: 'UAL1', fullName: 'Rajvardhan Hangargekar', country: 'India', age: 23, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 40 },
-            { id: 43, set: 'UAL1', fullName: 'Tanush Kotian', country: 'India', age: 27, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 44, set: 'UAL1', fullName: 'Shivang Kumar', country: 'India', age: 23, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 45, set: 'UAL1', fullName: 'Mahipal Lomror', country: 'India', age: 26, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 50 },
-            { id: 46, set: 'UAL1', fullName: 'Kamlesh Nagarkoti', country: 'India', age: 26, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 47, set: 'UAL1', fullName: 'Vijay Shankar', country: 'India', age: 35, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 48, set: 'UAL1', fullName: 'Sanvir Singh', country: 'India', age: 29, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 49, set: 'UAL1', fullName: 'Edhen Tom', country: 'India', age: 20, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 50, set: 'UAL1', fullName: 'Prashant Veer', country: 'India', age: 20, specialism: 'ALL-ROUNDER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 51, set: 'UWK1', fullName: 'Ruchit Ahir', country: 'India', age: 25, specialism: 'WICKETKEEPER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 52, set: 'UWK1', fullName: 'Vansh Bedi', country: 'India', age: 23, specialism: 'WICKETKEEPER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 53, set: 'UWK1', fullName: 'Mukul Choudhary', country: 'India', age: 21, specialism: 'WICKETKEEPER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 54, set: 'UWK1', fullName: 'Tushar Raheja', country: 'India', age: 25, specialism: 'WICKETKEEPER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 55, set: 'UWK1', fullName: 'Kartik Sharma', country: 'India', age: 19, specialism: 'WICKETKEEPER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 56, set: 'UWK1', fullName: 'Tejasvi Singh', country: 'India', age: 23, specialism: 'WICKETKEEPER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 57, set: 'UFA1', fullName: 'Raj Limbani', country: 'India', age: 21, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 58, set: 'UFA1', fullName: 'Akash Madhwal', country: 'India', age: 32, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 59, set: 'UFA1', fullName: 'Sushant Mishra', country: 'India', age: 25, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 60, set: 'UFA1', fullName: 'Ashok Sharma', country: 'India', age: 23, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 61, set: 'UFA1', fullName: 'Simarjeet Singh', country: 'India', age: 28, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 62, set: 'UFA1', fullName: 'Naman Tiwari', country: 'India', age: 20, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 63, set: 'UFA1', fullName: 'Kartik Tyagi', country: 'India', age: 25, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 64, set: 'USP1', fullName: 'Yash Raj Punja', country: 'India', age: 20, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 65, set: 'USP1', fullName: 'Vignesh Puthur', country: 'India', age: 25, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 66, set: 'USP1', fullName: 'Karn Sharma', country: 'India', age: 38, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 50 },
-            { id: 67, set: 'USP1', fullName: 'Shivam Shukla', country: 'India', age: 30, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 68, set: 'USP1', fullName: 'Kumar Kartikeya Singh', country: 'India', age: 28, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 69, set: 'USP1', fullName: 'Prashant Solanki', country: 'India', age: 26, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 70, set: 'USP1', fullName: 'Wahidullah Zadran', country: 'Afghanistan', age: 18, specialism: 'BOWLER', cappedUncapped: 'Uncapped', basePrice: 30 },
-            { id: 71, set: 'BA2', fullName: 'Mayank Agarawal', country: 'India', age: 35, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 72, set: 'BA2', fullName: 'Sediqullah Atal', country: 'Afghanistan', age: 24, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 73, set: 'BA2', fullName: 'Ackeem Auguste', country: 'West Indies', age: 22, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 74, set: 'BA2', fullName: 'Reeza Hendricks', country: 'South Africa', age: 36, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 75, set: 'BA2', fullName: 'Pathum Nissanka', country: 'Sri Lanka', age: 27, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 76, set: 'BA2', fullName: 'Tim Robinson', country: 'New Zealand', age: 23, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 77, set: 'BA2', fullName: 'Steve Smith', country: 'Australia', age: 36, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 78, set: 'BA2', fullName: 'Rahul Tripathi', country: 'India', age: 35, specialism: 'BATTER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 79, set: 'AL2', fullName: 'Sean Abbott', country: 'Australia', age: 34, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 80, set: 'AL2', fullName: 'Michael Bracewell', country: 'New Zealand', age: 35, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 81, set: 'AL2', fullName: 'Ben Dwarshuis', country: 'Australia', age: 31, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 82, set: 'AL2', fullName: 'Zak Foulkes', country: 'New Zealand', age: 23, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 83, set: 'AL2', fullName: 'Jason Holder', country: 'West Indies', age: 34, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 84, set: 'AL2', fullName: 'Daryl Mitchell', country: 'New Zealand', age: 34, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 85, set: 'AL2', fullName: 'Daniel Sams', country: 'Australia', age: 33, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 86, set: 'AL2', fullName: 'Dasun Shanaka', country: 'Sri Lanka', age: 34, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 87, set: 'AL2', fullName: 'Matthew Short', country: 'Australia', age: 30, specialism: 'ALL-ROUNDER', cappedUncapped: 'Capped', basePrice: 150 },
-            { id: 88, set: 'WK2', fullName: 'Tom Banton', country: 'England', age: 27, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 89, set: 'WK2', fullName: 'Jordan Cox', country: 'England', age: 25, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 90, set: 'WK2', fullName: 'Shai Hope', country: 'West Indies', age: 32, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 91, set: 'WK2', fullName: 'Josh Inglis', country: 'Australia', age: 31, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 92, set: 'WK2', fullName: 'Benjamin McDermott', country: 'Australia', age: 31, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 93, set: 'WK2', fullName: 'Kusal Mendis', country: 'Sri Lanka', age: 31, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 94, set: 'WK2', fullName: 'Kusal Perera', country: 'Sri Lanka', age: 35, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 95, set: 'WK2', fullName: 'Tim Seifert', country: 'New Zealand', age: 31, specialism: 'WICKETKEEPER', cappedUncapped: 'Capped', basePrice: 150 },
-            { id: 96, set: 'FA2', fullName: 'Kyle Jamieson', country: 'New Zealand', age: 31, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 97, set: 'FA2', fullName: 'Saqib Mahmood', country: 'England', age: 29, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 150 },
-            { id: 98, set: 'FA2', fullName: 'Adam Milne', country: 'New Zealand', age: 33, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 99, set: 'FA2', fullName: 'Lungisani Ngidi', country: 'South Africa', age: 30, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 100, set: 'FA2', fullName: "William O'rourke", country: 'New Zealand', age: 24, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 101, set: 'FA2', fullName: 'Mustafizur Rahman', country: 'Bangladesh', age: 30, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 200 },
-            { id: 102, set: 'FA2', fullName: 'Chetan Sakariya', country: 'India', age: 28, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 103, set: 'FA2', fullName: 'Kuldeep Sen', country: 'India', age: 29, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 104, set: 'FA2', fullName: 'Umesh Yadav', country: 'India', age: 38, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 150 },
-            { id: 105, set: 'SP2', fullName: 'Qais Ahmad', country: 'Afghanistan', age: 25, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 106, set: 'SP2', fullName: 'Rishad Hossain', country: 'Bangladesh', age: 23, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 75 },
-            { id: 107, set: 'SP2', fullName: 'Mohammad Waqar Salamkheil', country: 'Afghanistan', age: 24, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 100 },
-            { id: 108, set: 'SP2', fullName: 'Vivaskanth Vijayakanth', country: 'Sri Lanka', age: 24, specialism: 'BOWLER', cappedUncapped: 'Capped', basePrice: 75 },
+        // Player data extracted from the PDF
+        const players = [
+            {srNo: 1, name: "Devon Conway", country: "New Zealand", age: 34, specialism: "BATTER", price: "200", status: "Capped"},
+            {srNo: 2, name: "Jake Fraser-McGurk", country: "Australia", age: 23, specialism: "BATTER", price: "200", status: "Capped"},
+            {srNo: 3, name: "Cameron Green", country: "Australia", age: 26, specialism: "BATTER", price: "200", status: "Capped"},
+            {srNo: 4, name: "Sarfaraz Khan", country: "India", age: 28, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 5, name: "David Miller", country: "South Africa", age: 36, specialism: "BATTER", price: "200", status: "Capped"},
+            {srNo: 6, name: "Prithvi Shaw", country: "India", age: 26, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 7, name: "Gus Atkinson", country: "England", age: 28, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 8, name: "Wanindu Hasaranga", country: "Sri Lanka", age: 28, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 9, name: "Deepak Hooda", country: "India", age: 30, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 10, name: "Venkatesh Iyer", country: "India", age: 31, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 11, name: "Liam Livingstone", country: "England", age: 32, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 12, name: "Wiaan Mulder", country: "South Africa", age: 28, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 13, name: "Rachin Ravindra", country: "New Zealand", age: 26, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 14, name: "Finn Allen", country: "New Zealand", age: 26, specialism: "WICKETKEEPER", price: "200", status: "Capped"},
+            {srNo: 15, name: "Jonny Bairstow", country: "England", age: 36, specialism: "WICKETKEEPER", price: "100", status: "Capped"},
+            {srNo: 16, name: "K.S. Bharat", country: "India", age: 32, specialism: "WICKETKEEPER", price: "75", status: "Capped"},
+            {srNo: 17, name: "Quinton De Kock", country: "South Africa", age: 33, specialism: "WICKETKEEPER", price: "100", status: "Capped"},
+            {srNo: 18, name: "Ben Duckett", country: "England", age: 31, specialism: "WICKETKEEPER", price: "200", status: "Capped"},
+            {srNo: 19, name: "Rahmanullah Gurbaz", country: "Afghanistan", age: 24, specialism: "WICKETKEEPER", price: "150", status: "Capped"},
+            {srNo: 20, name: "Jamie Smith", country: "England", age: 25, specialism: "WICKETKEEPER", price: "200", status: "Capped"},
+            {srNo: 21, name: "Gerald Coetzee", country: "South Africa", age: 25, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 22, name: "Akash Deep", country: "India", age: 29, specialism: "BOWLER", price: "100", status: "Capped"},
+            {srNo: 23, name: "Jacob Duffy", country: "New Zealand", age: 31, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 24, name: "Fazalhaq Farooqi", country: "Afghanistan", age: 25, specialism: "BOWLER", price: "100", status: "Capped"},
+            {srNo: 25, name: "Matt Henry", country: "New Zealand", age: 34, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 26, name: "Spencer Johnson", country: "Australia", age: 30, specialism: "BOWLER", price: "150", status: "Capped"},
+            {srNo: 27, name: "Shivam Mavi", country: "India", age: 27, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 28, name: "Anrich Nortje", country: "South Africa", age: 32, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 29, name: "Matheesha Pathirana", country: "Sri Lanka", age: 23, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 30, name: "Ravi Bishnoi", country: "India", age: 25, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 31, name: "Rahul Chahar", country: "India", age: 26, specialism: "BOWLER", price: "100", status: "Capped"},
+            {srNo: 32, name: "Akeal Hosein", country: "West Indies", age: 32, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 33, name: "Mujeeb Rahman", country: "Afghanistan", age: 25, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 34, name: "Maheesh Theekshana", country: "Sri Lanka", age: 25, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 35, name: "Aarya Desai", country: "India", age: 23, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 36, name: "Yash Dhull", country: "India", age: 23, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 37, name: "Abhinav Manohar", country: "India", age: 31, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 38, name: "Anmolpreet Singh", country: "India", age: 28, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 39, name: "Atharva Taide", country: "India", age: 25, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 40, name: "Abhinav Tejrana", country: "India", age: 25, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 41, name: "Auqib Dar", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 42, name: "Rajvardhan Hangargekar", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "40", status: "Uncapped"},
+            {srNo: 43, name: "Tanush Kotian", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 44, name: "Shivang Kumar", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 45, name: "Mahipal Lomror", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "50", status: "Uncapped"},
+            {srNo: 46, name: "Kamlesh Nagarkoti", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 47, name: "Vijay Shankar", country: "India", age: 35, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 48, name: "Sanvir Singh", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 49, name: "Edhen Tom", country: "India", age: 20, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 50, name: "Prashant Veer", country: "India", age: 20, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 51, name: "Ruchit Ahir", country: "India", age: 25, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 52, name: "Vansh Bedi", country: "India", age: 23, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 53, name: "Mukul Choudhary", country: "India", age: 21, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 54, name: "Tushar Raheja", country: "India", age: 25, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 55, name: "Kartik Sharma", country: "India", age: 19, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 56, name: "Tejasvi Singh", country: "India", age: 23, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 57, name: "Raj Limbani", country: "India", age: 21, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 58, name: "Akash Madhwal", country: "India", age: 32, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 59, name: "Sushant Mishra", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 60, name: "Ashok Sharma", country: "India", age: 23, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 61, name: "Simarjeet Singh", country: "India", age: 28, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 62, name: "Naman Tiwari", country: "India", age: 20, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 63, name: "Kartik Tyagi", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 64, name: "Yash Raj Punja", country: "India", age: 20, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 65, name: "Vignesh Puthur", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 66, name: "Karn Sharma", country: "India", age: 38, specialism: "BOWLER", price: "50", status: "Uncapped"},
+            {srNo: 67, name: "Shivam Shukla", country: "India", age: 30, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 68, name: "Kumar Kartikeya Singh", country: "India", age: 28, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 69, name: "Prashant Solanki", country: "India", age: 26, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 70, name: "Wahidullah Zadran", country: "Afghanistan", age: 18, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 71, name: "Mayank Agarawal", country: "India", age: 35, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 72, name: "Sediqullah Atal", country: "Afghanistan", age: 24, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 73, name: "Ackeem Auguste", country: "West Indies", age: 22, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 74, name: "Reeza Hendricks", country: "South Africa", age: 36, specialism: "BATTER", price: "100", status: "Capped"},
+            {srNo: 75, name: "Pathum Nissanka", country: "Sri Lanka", age: 27, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 76, name: "Tim Robinson", country: "New Zealand", age: 23, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 77, name: "Steve Smith", country: "Australia", age: 36, specialism: "BATTER", price: "200", status: "Capped"},
+            {srNo: 78, name: "Rahul Tripathi", country: "India", age: 35, specialism: "BATTER", price: "75", status: "Capped"},
+            {srNo: 79, name: "Sean Abbott", country: "Australia", age: 34, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 80, name: "Michael Bracewell", country: "New Zealand", age: 35, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 81, name: "Ben Dwarshuis", country: "Australia", age: 31, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 82, name: "Zak Foulkes", country: "New Zealand", age: 23, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 83, name: "Jason Holder", country: "West Indies", age: 34, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 84, name: "Daryl Mitchell", country: "New Zealand", age: 34, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 85, name: "Daniel Sams", country: "Australia", age: 33, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 86, name: "Dasun Shanaka", country: "Sri Lanka", age: 34, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 87, name: "Matthew Short", country: "Australia", age: 30, specialism: "ALL-ROUNDER", price: "150", status: "Capped"},
+            {srNo: 88, name: "Tom Banton", country: "England", age: 27, specialism: "WICKETKEEPER", price: "200", status: "Capped"},
+            {srNo: 89, name: "Jordan Cox", country: "England", age: 25, specialism: "WICKETKEEPER", price: "75", status: "Capped"},
+            {srNo: 90, name: "Shai Hope", country: "West Indies", age: 32, specialism: "WICKETKEEPER", price: "200", status: "Capped"},
+            {srNo: 91, name: "Josh Inglis", country: "Australia", age: 31, specialism: "WICKETKEEPER", price: "200", status: "Capped"},
+            {srNo: 92, name: "Benjamin McDermott", country: "Australia", age: 31, specialism: "WICKETKEEPER", price: "75", status: "Capped"},
+            {srNo: 93, name: "Kusal Mendis", country: "Sri Lanka", age: 31, specialism: "WICKETKEEPER", price: "75", status: "Capped"},
+            {srNo: 94, name: "Kusal Perera", country: "Sri Lanka", age: 35, specialism: "WICKETKEEPER", price: "100", status: "Capped"},
+            {srNo: 95, name: "Tim Seifert", country: "New Zealand", age: 31, specialism: "WICKETKEEPER", price: "150", status: "Capped"},
+            {srNo: 96, name: "Kyle Jamieson", country: "New Zealand", age: 31, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 97, name: "Saqib Mahmood", country: "England", age: 29, specialism: "BOWLER", price: "150", status: "Capped"},
+            {srNo: 98, name: "Adam Milne", country: "New Zealand", age: 33, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 99, name: "Lungisani Ngidi", country: "South Africa", age: 30, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 100, name: "William Orourke", country: "New Zealand", age: 24, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 101, name: "Mustafizur Rahman", country: "Bangladesh", age: 30, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 102, name: "Chetan Sakariya", country: "India", age: 28, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 103, name: "Kuldeep Sen", country: "India", age: 29, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 104, name: "Umesh Yadav", country: "India", age: 38, specialism: "BOWLER", price: "150", status: "Capped"},
+            {srNo: 105, name: "Qais Ahmad", country: "Afghanistan", age: 25, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 106, name: "Rishad Hossain", country: "Bangladesh", age: 23, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 107, name: "Mohammad Waqar Salamkheil", country: "Afghanistan", age: 24, specialism: "BOWLER", price: "100", status: "Capped"},
+            {srNo: 108, name: "Viyaskanth Vijayakanth", country: "Sri Lanka", age: 24, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 109, name: "Ankit Kumar", country: "India", age: 22, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 110, name: "Rohan Kunnummal", country: "India", age: 27, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 111, name: "Danish Malewar", country: "India", age: 22, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 112, name: "Pukhraj Mann", country: "India", age: 24, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 113, name: "Salman Nizar", country: "India", age: 28, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 114, name: "Aman Rao Perala", country: "India", age: 21, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 115, name: "Akshat Raghuwanshi", country: "India", age: 22, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 116, name: "Manan Vohra", country: "India", age: 32, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 117, name: "Yuvraj Chaudhary", country: "India", age: 24, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 118, name: "Satvik Deswal", country: "India", age: 19, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 119, name: "Aman Khan", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 120, name: "Darshan Nalkande", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 121, name: "Vicky Ostwal", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 122, name: "Sairaj Patil", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 123, name: "Suyash Prabhudessai", country: "India", age: 28, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 124, name: "Mayank Rawat", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 125, name: "Harsh Tyagi", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 126, name: "Mangesh Yadav", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 127, name: "Salil Arora", country: "India", age: 23, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 128, name: "Ricky Bhui", country: "India", age: 29, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 129, name: "Rahul Buddhi", country: "India", age: 28, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 130, name: "Saurav Chuahan", country: "India", age: 25, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 131, name: "Yashvardhan Dalal", country: "India", age: 20, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 132, name: "Abhishek Pathak", country: "India", age: 29, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 133, name: "Kunal Rathore", country: "India", age: 23, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 134, name: "Ravi Singh", country: "India", age: 24, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 135, name: "K.M Asif", country: "India", age: 32, specialism: "BOWLER", price: "40", status: "Uncapped"},
+            {srNo: 136, name: "Sakib Hussain", country: "India", age: 21, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 137, name: "Mohammad Izhar", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 138, name: "Vidwath Kaverappa", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 139, name: "Vijay Kumar", country: "India", age: 20, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 140, name: "Vidyadhar Patil", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 141, name: "PV.Satyanarayana Raju", country: "India", age: 26, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 142, name: "Onkar Tarmale", country: "India", age: 23, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 143, name: "Prithviraj Yarra", country: "India", age: 28, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 144, name: "Shubham Agrawal", country: "India", age: 32, specialism: "BOWLER", price: "40", status: "Uncapped"},
+            {srNo: 145, name: "Murugan Ashwin", country: "India", age: 35, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 146, name: "Tejas Baroka", country: "India", age: 30, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 147, name: "K.C. Cariappa", country: "India", age: 31, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 148, name: "Kartik Chadha", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 149, name: "Pravin Dubey", country: "India", age: 32, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 150, name: "Mohit Rathee", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 151, name: "Himanshu Sharma", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 152, name: "Bailapudi Yeswanth", country: "India", age: 21, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 153, name: "Rehan Ahmed", country: "England", age: 21, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 154, name: "Cooper Connolly", country: "Australia", age: 22, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 155, name: "Tom Curran", country: "England", age: 31, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 156, name: "Bevon-John Jacobs", country: "New Zealand", age: 23, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 157, name: "Daniel Lawrence", country: "England", age: 28, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 158, name: "George Linde", country: "South Africa", age: 34, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 159, name: "Gulbadin Naib", country: "Afghanistan", age: 34, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 160, name: "William Sutherland", country: "Australia", age: 26, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 161, name: "Beau Webster", country: "Australia", age: 32, specialism: "ALL-ROUNDER", price: "125", status: "Capped"},
+            {srNo: 162, name: "Taskin Ahmed", country: "Bangladesh", age: 31, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 163, name: "Richard Gleeson", country: "England", age: 38, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 164, name: "Alzarri Joseph", country: "West Indies", age: 29, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 165, name: "Shamar Joseph", country: "West Indies", age: 26, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 166, name: "Riley Meredith", country: "Australia", age: 29, specialism: "BOWLER", price: "150", status: "Capped"},
+            {srNo: 167, name: "Jhye Richardson", country: "Australia", age: 29, specialism: "BOWLER", price: "150", status: "Capped"},
+            {srNo: 168, name: "Navdeep Saini", country: "India", age: 33, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 169, name: "Naveen Ul Haq", country: "Afghanistan", age: 26, specialism: "BOWLER", price: "200", status: "Capped"},
+            {srNo: 170, name: "Luke Wood", country: "England", age: 30, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 171, name: "Kunal Chandela", country: "India", age: 31, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 172, name: "Ayush Doseja", country: "India", age: 23, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 173, name: "Qamran Iqbal", country: "India", age: 24, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 174, name: "M.Dheeraj Kumar", country: "India", age: 26, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 175, name: "Bhanu Pania", country: "India", age: 29, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 176, name: "Sahil Parakh", country: "India", age: 18, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 177, name: "Arsh Kabir Ranga", country: "India", age: 21, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 178, name: "Adarsh Singh", country: "India", age: 20, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 179, name: "Manoj Bhandage", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 180, name: "Mayank Dagar", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 181, name: "Raghav Goyal", country: "India", age: 24, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 182, name: "Manvanth Kumar", country: "India", age: 22, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 183, name: "Abid Mushtaq", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 184, name: "Jalaj Saxena", country: "India", age: 39, specialism: "ALL-ROUNDER", price: "40", status: "Uncapped"},
+            {srNo: 185, name: "Atit Sheth", country: "India", age: 30, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 186, name: "Hritik Shokeen", country: "India", age: 25, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 187, name: "Jagadeesha Suchith", country: "India", age: 32, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 188, name: "Tanay Thyagarajann", country: "India", age: 30, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 189, name: "Joe Clarke", country: "England", age: 29, specialism: "WICKETKEEPER", price: "50", status: "Uncapped"},
+            {srNo: 190, name: "Connor Esterhuizen", country: "South Africa", age: 24, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 191, name: "Ajitesh Guruswamy", country: "India", age: 23, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 192, name: "Siddharth Joon", country: "India", age: 19, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 193, name: "Tom Moores", country: "England", age: 29, specialism: "WICKETKEEPER", price: "40", status: "Uncapped"},
+            {srNo: 194, name: "Bipin Saurabh", country: "India", age: 26, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 195, name: "Vishnu Solanki", country: "India", age: 33, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 196, name: "Hardik Tamore", country: "India", age: 28, specialism: "WICKETKEEPER", price: "30", status: "Uncapped"},
+            {srNo: 197, name: "Sayan Ghosh", country: "India", age: 33, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 198, name: "Money Grewal", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 199, name: "Arpit Guleria", country: "India", age: 28, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 200, name: "Sunil Kumar", country: "India", age: 28, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 201, name: "Tristan Luus", country: "South Africa", age: 20, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 202, name: "Divesh Sharma", country: "India", age: 24, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 203, name: "Abhilash Shetty", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 204, name: "Irfan Umair", country: "India", age: 29, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 205, name: "Kuldip Yadav", country: "India", age: 29, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 206, name: "Manan Bhardwaj", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 207, name: "Shreyas Chavan", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 208, name: "Parikshit Dhanak", country: "India", age: 23, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 209, name: "Chintal Gandhi", country: "India", age: 31, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 210, name: "Dharmendrasinh Jadeja", country: "India", age: 35, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 211, name: "Amit Kumar", country: "India", age: 23, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 212, name: "Vishal Nishad", country: "India", age: 21, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 213, name: "Saumy Pandey", country: "India", age: 21, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 214, name: "Jhathavedh Subramanyan", country: "India", age: 26, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 215, name: "Muhammad Abbas", country: "New Zealand", age: 22, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 216, name: "Charith Asalanka", country: "Sri Lanka", age: 28, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 217, name: "Roston Chase", country: "West Indies", age: 34, specialism: "ALL-ROUNDER", price: "125", status: "Capped"},
+            {srNo: 218, name: "Liam Dawson", country: "England", age: 36, specialism: "ALL-ROUNDER", price: "200", status: "Capped"},
+            {srNo: 219, name: "George Garton", country: "England", age: 28, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 220, name: "Kyle Mayers", country: "West Indies", age: 33, specialism: "ALL-ROUNDER", price: "125", status: "Capped"},
+            {srNo: 221, name: "Dwaine Pretorius", country: "South Africa", age: 37, specialism: "ALL-ROUNDER", price: "100", status: "Capped"},
+            {srNo: 222, name: "Nathan Smith", country: "New Zealand", age: 27, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 223, name: "Dunith Wellalage", country: "Sri Lanka", age: 23, specialism: "ALL-ROUNDER", price: "75", status: "Capped"},
+            {srNo: 224, name: "Jason Behrendorff", country: "Australia", age: 35, specialism: "BOWLER", price: "150", status: "Capped"},
+            {srNo: 225, name: "Tanzim Hasan Sakib", country: "Bangladesh", age: 23, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 226, name: "Matthew Potts", country: "England", age: 27, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 227, name: "Nahid Rana", country: "Bangladesh", age: 23, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 228, name: "Olly Stone", country: "England", age: 32, specialism: "BOWLER", price: "125", status: "Capped"},
+            {srNo: 229, name: "Joshua Tongue", country: "England", age: 28, specialism: "BOWLER", price: "100", status: "Capped"},
+            {srNo: 230, name: "Sandeep Warrier", country: "India", age: 35, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 231, name: "Sachin Dhas", country: "India", age: 21, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 232, name: "Miles Hammond", country: "India", age: 30, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 233, name: "Ahammed Imran", country: "India", age: 19, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 234, name: "Vishvarajsinh Jadeja", country: "India", age: 27, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 235, name: "Ayaz Khan", country: "India", age: 23, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 236, name: "Daniel Lategan", country: "England", age: 19, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 237, name: "Siddhant Rana", country: "India", age: 25, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 238, name: "Aaron Varghese", country: "India", age: 19, specialism: "BATTER", price: "30", status: "Uncapped"},
+            {srNo: 239, name: "Atharva Ankolekar", country: "India", age: 25, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 240, name: "Abdul Bazith", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 241, name: "Karan Lal", country: "India", age: 25, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 242, name: "Shams Mulani", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 243, name: "Ripal Patel", country: "India", age: 30, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 244, name: "Prince Rai", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 245, name: "Vivrant Sharma", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 246, name: "Utkarsh Singh", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 247, name: "Ayush Vartak", country: "India", age: 21, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 248, name: "Sanjay Yadav", country: "India", age: 30, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 249, name: "Sayed Irfan Aftab", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 250, name: "Esakkimuthu Ayyakutti", country: "India", age: 24, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 251, name: "Praful Hinge", country: "India", age: 24, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 252, name: "Pankaj Jaswal", country: "India", age: 30, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 253, name: "Kulwant Khejroliya", country: "India", age: 34, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 254, name: "Ravi Kumar", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 255, name: "Rajan Kumar", country: "India", age: 29, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 256, name: "Safvan Patel", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 257, name: "Ishan Porel", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 258, name: "Purav Agarwal", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 259, name: "Jikku Bright", country: "India", age: 29, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 260, name: "Yash Dicholkar", country: "India", age: 29, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 261, name: "Arab Gul", country: "Afghanistan", age: 20, specialism: "BOWLER", price: "40", status: "Uncapped"},
+            {srNo: 262, name: "Rakibul Hasan", country: "Bangladesh", age: 23, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 263, name: "Traveen Mathew", country: "Sri Lanka", age: 21, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 264, name: "Naman Pushpak", country: "India", age: 19, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 265, name: "Izaz Sawariya", country: "India", age: 20, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 266, name: "Roshan Wagshare", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 267, name: "Wesley Agar", country: "Australia", age: 29, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 268, name: "Binura Fernando", country: "Sri Lanka", age: 30, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 269, name: "Md Shoriful Islam", country: "Bangladesh", age: 24, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 270, name: "Joshua Little", country: "Ireland", age: 26, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 271, name: "Obed McCoy", country: "West Indies", age: 29, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 272, name: "Billy Stanlake", country: "Australia", age: 31, specialism: "BOWLER", price: "75", status: "Capped"},
+            {srNo: 273, name: "R.S Ambrish", country: "India", age: 18, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 274, name: "Nikhil Chaudhary", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "40", status: "Uncapped"},
+            {srNo: 275, name: "Krains Fuletra", country: "India", age: 21, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 276, name: "Macneil Noronha", country: "India", age: 24, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 277, name: "R Rajkumar", country: "India", age: 32, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 278, name: "Ninad Rathva", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 279, name: "Sunny Sandhu", country: "India", age: 22, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 280, name: "Shivalik Sharma", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 281, name: "Siddharth Yadav", country: "India", age: 22, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 282, name: "R.Sonu Yadav", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 283, name: "Waseem Khanday", country: "India", age: 26, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 284, name: "Atif Mushtaq", country: "India", age: 23, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 285, name: "Atal Rai", country: "India", age: 26, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 286, name: "C.Rakshann Readdi", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 287, name: "Manish Reddy", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 288, name: "Nishanth Saranu", country: "India", age: 21, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 289, name: "Deependra Singh", country: "India", age: 20, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 290, name: "Rajat Verma", country: "India", age: 28, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 291, name: "Rohit Yadav", country: "India", age: 26, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 292, name: "Emanjot Chahal", country: "India", age: 21, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 293, name: "Shubhang Hegde", country: "India", age: 25, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 294, name: "Bal Krishna", country: "India", age: 27, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 295, name: "Vihaan Malhotra", country: "India", age: 19, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 296, name: "Khilan Patel", country: "India", age: 19, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 297, name: "Delano Potgieter", country: "South Africa", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 298, name: "Hardik Raj", country: "India", age: 20, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 299, name: "Sarthak Ranjan", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 300, name: "Parth Rekhade", country: "India", age: 26, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 301, name: "Tiaan Van Vuuren", country: "South Africa", age: 24, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 302, name: "Shreevatsha Acharya", country: "India", age: 24, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 303, name: "Sadek Hussain", country: "India", age: 24, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 304, name: "Shubham Kapse", country: "India", age: 31, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 305, name: "Aaqib Khan", country: "India", age: 22, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 306, name: "Sabir Khan", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 307, name: "Bayanda Majola", country: "South Africa", age: 19, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 308, name: "Srihari Nair", country: "India", age: 23, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 309, name: "Brijesh Sharma", country: "India", age: 27, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 310, name: "Aman Shekhawat", country: "India", age: 25, specialism: "BOWLER", price: "30", status: "Uncapped"},
+            {srNo: 311, name: "Himanshu Bisht", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 312, name: "Shreyan Chakraborty", country: "India", age: 29, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 313, name: "Scratch Churban", country: "India", age: 19, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 314, name: "Mareak Gurain", country: "India", age: 24, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 315, name: "Aitch Pigazanorth", country: "India", age: 22, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 316, name: "Athinavapurighi Rajpal", country: "India", age: 22, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 317, name: "Svhenyan Bana", country: "India", age: 19, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 318, name: "Muravaditya Reddy", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 319, name: "Saipri India", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 320, name: "Arpram Singh Djihayal", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 321, name: "Dhabu Eanna", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 322, name: "Vukui Manbord", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 323, name: "Afzia Mohammad", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 324, name: "Nemang Pavel", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 325, name: "Mukai Somali", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 326, name: "Anul Indian", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 327, name: "Parth Vukui", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 328, name: "Wise Yadav", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 329, name: "Nitra Jai Yadav", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 330, name: "Nita Bilagiri", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 331, name: "Pirett India", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 332, name: "Samwar Gujar", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 333, name: "Sammar India", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 334, name: "Itham Multabadani", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 335, name: "Abhi Senda", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 336, name: "Mohammed Sharafuddana", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 337, name: "K.Ajay Singh", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 338, name: "Ritis India", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 339, name: "Ludwigshan Varadhar", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 340, name: "Mohamed Bali", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 341, name: "Mohava Bali", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 342, name: "Varsh Di Singh Bahri", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 343, name: "Bhushan Churban", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 344, name: "Jack Edwards", country: "Australia", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 345, name: "Danni Forrester", country: "South Africa", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 346, name: "Shiva Singh", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"},
+            {srNo: 347, name: "Pavlanka Valangaiter", country: "India", age: 23, specialism: "ALL-ROUNDER", price: "30", status: "Uncapped"}
         ];
 
+        // Initial display
+        let filteredPlayers = [...players];
+        let currentSort = {column: 'srNo', direction: 'asc'};
+        let currentPage = 1;
+        const playersPerPage = 25;
 
-        // --- 2. CORE FUNCTIONALITY ---
+        // DOM elements
+        const playersTableBody = document.getElementById('playersTableBody');
         const searchInput = document.getElementById('searchInput');
-        const sortSelect = document.getElementById('sortSelect');
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const playerListContainer = document.getElementById('playerList');
-        const noResultsDiv = document.getElementById('noResults');
+        const specialismFilter = document.getElementById('specialismFilter');
+        const countryFilter = document.getElementById('countryFilter');
+        const priceFilter = document.getElementById('priceFilter');
+        const totalPlayersElement = document.getElementById('totalPlayers');
+        const cappedPlayersElement = document.getElementById('cappedPlayers');
+        const uncappedPlayersElement = document.getElementById('uncappedPlayers');
+        const indianPlayersElement = document.getElementById('indianPlayers');
+        const overseasPlayersElement = document.getElementById('overseasPlayers');
+        const noResultsElement = document.getElementById('noResults');
+        const paginationElement = document.getElementById('pagination');
 
-        let activeFilter = 'All';
+        // Initialize stats
+        updateStats();
 
-        /**
-         * Renders the given array of players into the table.
-         * @param {Array} players - The array of player objects to display.
-         */
-        function renderPlayers(players) {
-            playerListContainer.innerHTML = ''; // Clear existing rows
-            
-            if (players.length === 0) {
-                noResultsDiv.classList.remove('hidden');
-                return;
+        // Render the table
+        renderTable();
+
+        // Add event listeners
+        searchInput.addEventListener('input', filterAndRender);
+        specialismFilter.addEventListener('change', filterAndRender);
+        countryFilter.addEventListener('change', filterAndRender);
+        priceFilter.addEventListener('change', filterAndRender);
+
+        // Add sort event listeners to table headers
+        document.querySelectorAll('th.sortable').forEach(th => {
+            th.addEventListener('click', () => {
+                const column = th.getAttribute('data-sort');
+                sortPlayers(column);
+            });
+        });
+
+        // Functions
+        function filterAndRender() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const selectedSpecialism = specialismFilter.value;
+            const selectedCountry = countryFilter.value;
+            const selectedPrice = priceFilter.value;
+
+            filteredPlayers = players.filter(player => {
+                // Search term filter
+                const matchesSearch = searchTerm === '' || 
+                    player.name.toLowerCase().includes(searchTerm) ||
+                    player.country.toLowerCase().includes(searchTerm) ||
+                    player.specialism.toLowerCase().includes(searchTerm) ||
+                    player.status.toLowerCase().includes(searchTerm);
+                
+                // Specialism filter
+                const matchesSpecialism = selectedSpecialism === '' || 
+                    player.specialism === selectedSpecialism;
+                
+                // Country filter
+                const matchesCountry = selectedCountry === '' || 
+                    player.country === selectedCountry;
+                
+                // Price filter
+                const matchesPrice = selectedPrice === '' || 
+                    player.price === selectedPrice;
+                
+                return matchesSearch && matchesSpecialism && matchesCountry && matchesPrice;
+            });
+
+            currentPage = 1;
+            renderTable();
+            updateStats();
+        }
+
+        function sortPlayers(column) {
+            // Toggle direction if same column
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
             } else {
-                noResultsDiv.classList.add('hidden');
+                currentSort.column = column;
+                currentSort.direction = 'asc';
             }
 
-            players.forEach(player => {
-                const isUncapped = player.cappedUncapped === 'Uncapped';
-                const row = document.createElement('tr');
-                row.className = `hover:bg-slate-800 transition ${isUncapped ? 'text-slate-400' : 'text-slate-100'}`;
+            filteredPlayers.sort((a, b) => {
+                let aValue = a[column];
+                let bValue = b[column];
 
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${player.id}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${player.fullName}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${player.country}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${player.age}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${player.specialism}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-xs">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isUncapped ? 'bg-ipl-orange text-ipl-dark' : 'bg-ipl-blue text-white'}">
-                            ${player.cappedUncapped}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">${player.set}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-ipl-gold">
-                        ₹${player.basePrice} Lakh
-                    </td>
-                `;
-                playerListContainer.appendChild(row);
+                // Handle numeric sorting for srNo, age, and price
+                if (column === 'srNo' || column === 'age') {
+                    aValue = parseInt(aValue);
+                    bValue = parseInt(bValue);
+                } else if (column === 'price') {
+                    aValue = parseInt(aValue);
+                    bValue = parseInt(bValue);
+                }
+
+                if (aValue < bValue) {
+                    return currentSort.direction === 'asc' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return currentSort.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
             });
+
+            renderTable();
+            updateSortIndicators();
         }
 
-        /**
-         * Filters and sorts the master list based on current controls.
-         */
-        function filterAndSort() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const sortValue = sortSelect.value;
-            
-            // 1. FILTERING
-            let result = playerMasterList.filter(player => {
-                // Filter 1: Specialism/CappedUncapped filter button
-                const filterMatch = activeFilter === 'All' || 
-                                    player.specialism === activeFilter ||
-                                    player.cappedUncapped === activeFilter;
-
-                // Filter 2: Search Input match
-                const searchMatch = player.fullName.toLowerCase().includes(searchTerm) ||
-                                    player.country.toLowerCase().includes(searchTerm);
-                
-                return filterMatch && searchMatch;
+        function updateSortIndicators() {
+            document.querySelectorAll('th i').forEach(icon => {
+                icon.className = 'fas fa-sort';
             });
 
-            // 2. SORTING
-            result.sort((a, b) => {
-                switch(sortValue) {
-                    case 'priceHigh': return b.basePrice - a.basePrice;
-                    case 'priceLow': return a.basePrice - b.basePrice;
-                    case 'nameAsc': return a.fullName.localeCompare(b.fullName);
-                    case 'countryAsc': return a.country.localeCompare(b.country);
-                    case 'ageAsc': return a.age - b.age;
-                    default: return a.id - b.id; // Default sort by Sr. No.
+            const currentTh = document.querySelector(`th[data-sort="${currentSort.column}"] i`);
+            if (currentTh) {
+                currentTh.className = currentSort.direction === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+            }
+        }
+
+        function renderTable() {
+            // Clear table body
+            playersTableBody.innerHTML = '';
+
+            // Calculate pagination
+            const totalPages = Math.ceil(filteredPlayers.length / playersPerPage);
+            const startIndex = (currentPage - 1) * playersPerPage;
+            const endIndex = Math.min(startIndex + playersPerPage, filteredPlayers.length);
+            const playersToShow = filteredPlayers.slice(startIndex, endIndex);
+
+            // Show/hide no results message
+            if (filteredPlayers.length === 0) {
+                noResultsElement.style.display = 'block';
+                playersTableBody.style.display = 'none';
+                paginationElement.innerHTML = '';
+                return;
+            } else {
+                noResultsElement.style.display = 'none';
+                playersTableBody.style.display = 'table-row-group';
+            }
+
+            // Render players
+            playersToShow.forEach(player => {
+                const row = document.createElement('tr');
+                
+                // Determine CSS classes
+                const countryClass = player.country === 'India' ? 'country-india' : 'country-other';
+                const specialismClass = player.specialism.toLowerCase().replace('-', '');
+                const statusClass = player.status.toLowerCase();
+                
+                row.innerHTML = `
+                    <td>${player.srNo}</td>
+                    <td><span class="player-name">${player.name}</span></td>
+                    <td><span class="country ${countryClass}">${player.country}</span></td>
+                    <td>${player.age}</td>
+                    <td><span class="specialism ${specialismClass}">${player.specialism}</span></td>
+                    <td class="price">${player.price} Lakh</td>
+                    <td><span class="${statusClass}">${player.status}</span></td>
+                `;
+                
+                playersTableBody.appendChild(row);
+            });
+
+            // Render pagination
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            paginationElement.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
                 }
             });
-
-            renderPlayers(result);
+            paginationElement.appendChild(prevButton);
+            
+            // Page buttons
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // Adjust start page if we're at the end
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                if (i === currentPage) {
+                    pageButton.classList.add('active');
+                }
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                });
+                paginationElement.appendChild(pageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+            paginationElement.appendChild(nextButton);
         }
 
-        // --- 3. EVENT LISTENERS ---
-
-        // Listen for search input and sort selection
-        searchInput.addEventListener('input', filterAndSort);
-        sortSelect.addEventListener('change', filterAndSort);
-
-        // Listen for filter button clicks
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Update active filter value
-                activeFilter = e.currentTarget.getAttribute('data-filter');
-
-                // Update button visual state
-                filterBtns.forEach(b => {
-                    b.classList.remove('active', 'bg-ipl-gold', 'text-ipl-blue', 'font-bold', 'shadow-lg');
-                    b.classList.add('bg-slate-800', 'text-slate-400');
-                });
-                
-                const target = e.currentTarget;
-                target.classList.remove('bg-slate-800', 'text-slate-400');
-                target.classList.add('active', 'bg-ipl-gold', 'text-ipl-blue', 'font-bold', 'shadow-lg');
-                
-                // Trigger filtering and sorting
-                filterAndSort();
-            });
-        });
-
-        // Initial render on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            filterAndSort();
-        });
+        function updateStats() {
+            const totalPlayers = players.length;
+            const cappedPlayers = players.filter(p => p.status === 'Capped').length;
+            const uncappedPlayers = players.filter(p => p.status === 'Uncapped').length;
+            const indianPlayers = players.filter(p => p.country === 'India').length;
+            const overseasPlayers = totalPlayers - indianPlayers;
+            
+            totalPlayersElement.textContent = totalPlayers;
+            cappedPlayersElement.textContent = cappedPlayers;
+            uncappedPlayersElement.textContent = uncappedPlayers;
+            indianPlayersElement.textContent = indianPlayers;
+            overseasPlayersElement.textContent = overseasPlayers;
+        }
     </script>
 </body>
 </html>
